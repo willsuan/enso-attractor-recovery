@@ -181,6 +181,133 @@ begin
 	(; n_months_valid = count(valid_n))
 end
 
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000001
+md"""
+### Sample months: what does the raw anomaly look like?
+
+Three monthly snapshots of the *processed* data we feed to PCA and DMAP:
+the December 1997 super-El-Niño, a near-neutral month, and the strong
+December 1999 La Niña. Same colormap, same range, dashed Niño 3.4 box
+on each. This is what one row of our $T \times N$ data matrix looks like
+when reshaped back onto the lat-lon grid.
+"""
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000002
+let
+	fig = Figure(size = (1500, 380))
+	months_to_show = [(Date(1997, 12, 1), "Dec 1997, super-El-Niño"),
+					   (Date(1989, 1, 1), "Jan 1989, near-neutral"),
+					   (Date(1999, 12, 1), "Dec 1999, strong La Niña")]
+	vmax = 4.0
+
+	local sct
+	for (j, (d, label)) in enumerate(months_to_show)
+		idx = findfirst(==(d), Date.(time_w))
+		ax = Axis(fig[1, j];
+				  title = label,
+				  xlabel = "longitude (°E)",
+				  ylabel = j == 1 ? "latitude (°N)" : "",
+				  aspect = 2.5)
+		slice = pac[idx, :, :]
+		sct = heatmap!(ax, lon, lat, slice';
+					   colormap = :RdBu_11, colorrange = (-vmax, vmax))
+		poly!(ax, Point2f[(190, -5), (240, -5), (240, 5), (190, 5)];
+			  color = (:black, 0), strokecolor = :black, strokewidth = 2,
+			  linestyle = :dash)
+	end
+	Colorbar(fig[1, 4], sct; label = "SST anomaly (°C)")
+	fig
+end
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000003
+md"""
+### Hovmöller diagram, equatorial SST anomaly through time
+
+Average SST anomaly across the equatorial band 2°S–2°N, plotted as a
+heat map of longitude × time. Every El Niño event shows up as a
+vertical band of warm anomalies marching eastward across the basin;
+the 1972, 1982-83, 1997-98, 2015-16, and 2023 events are clearly
+visible. La Niñas appear as cool blue stripes. **One picture
+summarises the data we're trying to recover.**
+"""
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000004
+let
+	eq_idx = findall(l -> -2 <= l <= 2, lat)
+	Lo = length(lon)
+	Tn = length(time_w)
+	eq_strip = fill(NaN32, Tn, Lo)
+	for t in 1:Tn, i in 1:Lo
+		vals = filter(!isnan, [pac[t, j, i] for j in eq_idx])
+		if !isempty(vals)
+			eq_strip[t, i] = mean(vals)
+		end
+	end
+	years_axis = [Dates.year(Date(t)) + (Dates.month(Date(t)) - 1)/12 for t in time_w]
+
+	fig = Figure(size = (1100, 720))
+	ax = Axis(fig[1, 1];
+			  title = "Equatorial Pacific SST anomaly (2°S–2°N average), longitude × time",
+			  xlabel = "longitude (°E)", ylabel = "year")
+	hm = heatmap!(ax, lon, years_axis, eq_strip';
+				  colormap = :RdBu_11, colorrange = (-3.5, 3.5))
+	Colorbar(fig[1, 2], hm; label = "SST anomaly (°C)")
+
+	for (yr, label) in [(1972.9, "1972 El Niño"),
+						(1982.9, "1982-83 El Niño"),
+						(1997.9, "1997-98 super-El-Niño"),
+						(2015.9, "2015-16 El Niño"),
+						(1988.9, "1988 La Niña"),
+						(1998.9, "1998-99 La Niña")]
+		text!(ax, 130, yr; text = label, color = :white,
+			  fontsize = 10, font = :bold)
+	end
+	fig
+end
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000005
+md"""
+### Niño 3.4, banded by phase
+
+Same time series as the official NOAA Niño 3.4 index, redrawn with
+warm phases (red fill above zero) and cool phases (blue fill below
+zero). Dashed horizontal lines mark the operational $\pm 0.5$ °C
+thresholds for El Niño and La Niña classification. The major events
+sit head and shoulders above the threshold.
+"""
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000006
+let
+	years_axis = [Dates.year(Date(t)) + (Dates.month(Date(t)) - 1)/12 for t in time_w]
+	fig = Figure(size = (1300, 360))
+	ax = Axis(fig[1, 1];
+			  title = "Niño 3.4 index, banded by ENSO phase",
+			  xlabel = "year", ylabel = "Niño 3.4 anomaly (°C)")
+
+	zero_line = fill(0.0, length(years_axis))
+	band!(ax, years_axis, zero_line, max.(nino34, 0.0); color = (:crimson, 0.55))
+	band!(ax, years_axis, min.(nino34, 0.0), zero_line; color = (:steelblue, 0.55))
+	lines!(ax, years_axis, nino34; color = :black, linewidth = 0.5)
+	hlines!(ax, [0]; color = :gray, linewidth = 0.5)
+	hlines!(ax, [0.5, -0.5]; color = :gray, linestyle = :dash, linewidth = 0.7)
+	text!(ax, 1951.5, 0.55; text = "El Niño threshold (+0.5°C)",
+		  fontsize = 9, color = :gray)
+	text!(ax, 1951.5, -0.85; text = "La Niña threshold (−0.5°C)",
+		  fontsize = 9, color = :gray)
+
+	for (d, label) in [(Date(1972,12,1), "'72"), (Date(1982,12,1), "'82"),
+					   (Date(1997,12,1), "'97"), (Date(2015,12,1), "'15"),
+					   (Date(2023,12,1), "'23")]
+		idx = findfirst(==(d), Date.(time_w))
+		if !isnothing(idx)
+			text!(ax, years_axis[idx], nino34[idx] + 0.15; text = label,
+				  fontsize = 11, color = :black, font = :bold,
+				  align = (:center, :bottom))
+		end
+	end
+	fig
+end
+
 # ╔═╡ a2fed5c7-0243-4eea-b187-7f24d7feb845
 md"""
 ## 2, Predictions made *before* running anything
@@ -397,6 +524,38 @@ historical El Niños (1972, 1982, 1997, 2015, 2023; black stars) appear
 as peaks in both. **P2 passes** with margin (target 0.90; observed 0.946).
 """
 
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000007
+md"""
+### Higher-order EOFs: what does PCA see beyond mode 1?
+
+PCA produces an orthogonal basis of variance directions. EOF 1 is the
+canonical ENSO horseshoe; EOFs 2-4 capture the next pieces of the
+variance budget. Each panel's title reports the percent of total
+variance that mode explains.
+"""
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000008
+let
+	fig = Figure(size = (1500, 700))
+	for k in 1:4
+		row = (k <= 2) ? 1 : 2
+		col = ((k - 1) % 2) + 1
+		G = eof_grid(EOF[:, k], mask, weights)
+		vmax = maximum(abs, filter(!isnan, G))
+		ax = Axis(fig[row, col];
+				  title = "EOF $k  ($(round(100*pca.explained[k]; digits=1))% var)",
+				  xlabel = row == 2 ? "longitude (°E)" : "",
+				  ylabel = col == 1 ? "latitude (°N)" : "",
+				  aspect = 2.5)
+		heatmap!(ax, lon, lat, G';
+				 colormap = :RdBu_11, colorrange = (-vmax, vmax))
+		poly!(ax, Point2f[(190, -5), (240, -5), (240, 5), (190, 5)];
+			  color = (:black, 0), strokecolor = :black, strokewidth = 1.2,
+			  linestyle = :dash)
+	end
+	fig
+end
+
 # ╔═╡ 92eb9810-102f-4dbd-b618-604121d19f3b
 md"""
 ## 4, Method 2: Anisotropic Diffusion Maps (out-of-course)
@@ -571,6 +730,54 @@ no comparable spectral-gap structure; the contrast between the two
 spectra is itself an answer to "what does each method see?"
 """
 
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000009
+md"""
+### What the kernel actually sees: the affinity matrix
+
+The diffusion-map construction starts with the pairwise affinity
+matrix
+```math
+K_\varepsilon(i, j) = \exp(-\|x_i - x_j\|^2 / \varepsilon),
+```
+a $T \times T$ object telling you "how similar is month $i$ to month
+$j$." Below is that matrix as an image, with months ordered
+chronologically on both axes. Bright off-diagonal patches mark months
+in different decades that nevertheless share a similar SST anomaly
+configuration. The leading eigenvectors of (the α-renormalised,
+row-stochastic version of) this matrix become Ψ₂, Ψ₃, ...
+"""
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000a
+let
+	D2 = pairwise_sqdist(X)
+	ε_use = median_bandwidth(D2)
+	K_aff = exp.(.-(D2 ./ ε_use))
+	years_axis = [Dates.year(Date(t)) + (Dates.month(Date(t)) - 1)/12 for t in time_w]
+
+	fig = Figure(size = (820, 740))
+	ax = Axis(fig[1, 1];
+			  title = "Pairwise affinity K_ε(month_i, month_j), tropical-Pacific SST",
+			  xlabel = "month i (year)", ylabel = "month j (year)",
+			  aspect = 1.0)
+	hm = heatmap!(ax, years_axis, years_axis, K_aff;
+				  colormap = :viridis, colorrange = (0, 1))
+	Colorbar(fig[1, 2], hm; label = "kernel similarity")
+	fig
+end
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000b
+md"""
+### What does "similar to Dec 1997" actually mean?
+
+Picking the December 1997 super-El-Niño as a query month, here are
+the **ten months whose SST patterns are most similar to it under
+the Gaussian kernel**, projected onto the diffusion-map embedding.
+They cluster tightly in the warm corner of the manifold, because the
+kernel encodes "two months in similar climate configurations have
+high affinity." This is the geometric content the spectral
+decomposition is operating on.
+"""
+
 # ╔═╡ c5eb626e-d6ff-473a-8adc-92ba2cdb10b1
 md"""
 ### Phase portrait, α = 1 (Laplace–Beltrami) and the (Ψ₂, Ψ₃) horseshoe
@@ -668,6 +875,31 @@ with phase-dependent dynamics**: along one arc the system moves quickly
 persists longer than equivalent cool tongues).
 """
 
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000d
+md"""
+### Density contours: where does the climate state spend its time?
+
+The same (Ψ₂, Ψ₃) phase portrait, with a 2-D occupancy estimate
+plotted as filled contours behind the points. Most of the climate
+state's time is spent in the central neutral region of the manifold;
+the warm El Niño and cool La Niña corners are visited rarely. The
+shape of the high-density region is the climatological "attractor in
+the Lebesgue sense", literally where probability piles up in the
+embedding.
+"""
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000f
+md"""
+### Trajectory by month-of-year
+
+The same 1996–1999 ENSO cycle as in the phase portrait, but with the
+trajectory points coloured by **month-of-year** (a circular colormap).
+Notice how the climate state hits the warm corner in late boreal
+autumn / early winter each year. This **seasonal phase-locking** of
+ENSO peaks is a well-documented feature, ENSO events tend to mature
+between November and January, the manifold makes it visible.
+"""
+
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000001
 md"""
 ### Beyond static figures: 3-D attractor and animated trajectory
@@ -750,6 +982,103 @@ begin
 		        ρ = [cor(Ψα[valid_n, k], nino34[valid_n]) for k in 1:5])
 	end
 	"computed all three α"
+end
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000c
+let
+	dec97_idx = findfirst(==(Date(1997, 12, 1)), Date.(time_w))
+	α1 = dm_alpha[1.0]
+	Ψ1 = α1.Ψ
+
+	D2 = pairwise_sqdist(X)
+	ε_use = median_bandwidth(D2)
+	sim = exp.(-D2[dec97_idx, :] ./ ε_use)
+	sim[dec97_idx] = -1.0
+	top10 = sortperm(sim; rev = true)[1:10]
+
+	fig = Figure(size = (1100, 620))
+	ax = Axis(fig[1, 1];
+			  title = "Top-10 months most similar to Dec 1997 (Gaussian kernel, α=1 embedding)",
+			  xlabel = "Ψ₂", ylabel = "Ψ₃")
+
+	scatter!(ax, Ψ1[:, 1], Ψ1[:, 2]; color = (:gray, 0.25), markersize = 4)
+	scatter!(ax, Ψ1[top10, 1], Ψ1[top10, 2];
+			 color = :crimson, markersize = 14,
+			 strokecolor = :black, strokewidth = 0.5)
+	for i in top10
+		text!(ax, Ψ1[i, 1] + 0.012, Ψ1[i, 2];
+			  text = Dates.format(Date(time_w[i]), "u 'yy"),
+			  fontsize = 9, color = :black)
+	end
+	scatter!(ax, [Ψ1[dec97_idx, 1]], [Ψ1[dec97_idx, 2]];
+			 color = :black, markersize = 22, marker = :star5)
+	text!(ax, Ψ1[dec97_idx, 1] + 0.012, Ψ1[dec97_idx, 2] - 0.015;
+		  text = "  Dec 1997 (query)", fontsize = 12, font = :bold)
+	fig
+end
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000e
+let
+	α1 = dm_alpha[1.0]
+	Ψ1 = α1.Ψ
+	xs = Ψ1[:, 1]; ys = Ψ1[:, 2]
+
+	nb = 32
+	xrng = range(minimum(xs) - 0.05, maximum(xs) + 0.05; length = nb + 1)
+	yrng = range(minimum(ys) - 0.05, maximum(ys) + 0.05; length = nb + 1)
+	Hd = zeros(nb, nb)
+	for k in 1:length(xs)
+		i = clamp(searchsortedlast(xrng, xs[k]), 1, nb)
+		j = clamp(searchsortedlast(yrng, ys[k]), 1, nb)
+		Hd[i, j] += 1
+	end
+	xc = (xrng[1:end-1] .+ xrng[2:end]) ./ 2
+	yc = (yrng[1:end-1] .+ yrng[2:end]) ./ 2
+
+	fig = Figure(size = (950, 700))
+	ax = Axis(fig[1, 1];
+			  title = "Phase-portrait state density + Niño 3.4-coloured points",
+			  xlabel = "Ψ₂", ylabel = "Ψ₃")
+	contourf!(ax, xc, yc, Hd; colormap = :viridis,
+			  levels = range(0, maximum(Hd); length = 8))
+	sct = scatter!(ax, xs, ys; color = nino34, colormap = :RdBu_11,
+				   colorrange = (-2.5, 2.5), markersize = 5,
+				   strokecolor = (:white, 0.4), strokewidth = 0.3)
+	Colorbar(fig[1, 2], sct; label = "Niño 3.4 (°C)")
+	fig
+end
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000010
+let
+	α1 = dm_alpha[1.0]
+	Ψ1 = α1.Ψ
+	cs = findfirst(==(Date(1996, 1, 1)), Date.(time_w))
+	ce = findfirst(==(Date(1999, 12, 1)), Date.(time_w))
+	seg = cs:ce
+	months_seg = [Dates.month(Date(t)) for t in time_w[seg]]
+
+	fig = Figure(size = (1000, 700))
+	ax = Axis(fig[1, 1];
+			  title = "1996–1999 trajectory, coloured by month-of-year (seasonal phase)",
+			  xlabel = "Ψ₂", ylabel = "Ψ₃")
+	scatter!(ax, Ψ1[:, 1], Ψ1[:, 2]; color = (:gray, 0.18), markersize = 3)
+	lines!(ax, Ψ1[seg, 1], Ψ1[seg, 2]; color = (:black, 0.4), linewidth = 1.0)
+	sct = scatter!(ax, Ψ1[seg, 1], Ψ1[seg, 2]; color = months_seg,
+				   colormap = :twilight, colorrange = (1, 12), markersize = 11,
+				   strokecolor = :black, strokewidth = 0.3)
+	Colorbar(fig[1, 2], sct; label = "month of year",
+			 ticks = ([1, 4, 7, 10, 12], ["Jan", "Apr", "Jul", "Oct", "Dec"]))
+
+	for d in [Date(1996, 12, 1), Date(1997, 12, 1),
+			  Date(1998, 12, 1), Date(1999, 12, 1)]
+		idx = findfirst(==(d), Date.(time_w))
+		if !isnothing(idx)
+			text!(ax, Ψ1[idx, 1] + 0.008, Ψ1[idx, 2];
+				  text = "Dec " * string(Dates.year(d)),
+				  fontsize = 9, color = :black)
+		end
+	end
+	fig
 end
 
 # ╔═╡ 843da5fd-0fb0-499a-8807-e2a09bb2d20c
@@ -3032,6 +3361,12 @@ version = "4.1.0+0"
 # ╠═94c1b1bd-6bbb-447d-963c-7d37569209b3
 # ╠═d5c1a5ac-248a-439c-a45a-56a053a1cfad
 # ╠═6c8313b3-08ca-4a7a-b130-3678b9dfa234
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa00000001
+# ╠═30d4a0b5-bbbb-cccc-dddd-aaaa00000002
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa00000003
+# ╠═30d4a0b5-bbbb-cccc-dddd-aaaa00000004
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa00000005
+# ╠═30d4a0b5-bbbb-cccc-dddd-aaaa00000006
 # ╟─a2fed5c7-0243-4eea-b187-7f24d7feb845
 # ╟─eaff9fa5-3072-4f2d-848b-6d6705f6b65e
 # ╠═1e3a6b29-61f7-46f4-a2a8-32f449faaf27
@@ -3043,6 +3378,8 @@ version = "4.1.0+0"
 # ╟─f512c08c-b1f4-4104-824f-f5e0c2506f2f
 # ╠═52acae2e-4dfc-4394-9404-546addc5a228
 # ╟─147cf9a2-7582-48d1-bd4d-194b9d184480
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa00000007
+# ╠═30d4a0b5-bbbb-cccc-dddd-aaaa00000008
 # ╟─92eb9810-102f-4dbd-b618-604121d19f3b
 # ╟─30d4a0b5-bbbb-cccc-dddd-100000000001
 # ╠═369b550f-b097-4470-ae92-e601394f5db0
@@ -3054,9 +3391,17 @@ version = "4.1.0+0"
 # ╟─506a5a59-29a5-447c-b0f9-1afe70b75251
 # ╠═880a564f-d0a4-47b0-8fc1-a6f83e714112
 # ╟─36b45df3-bb5c-4739-a21c-7f06d07ff491
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa00000009
+# ╠═30d4a0b5-bbbb-cccc-dddd-aaaa0000000a
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa0000000b
+# ╠═30d4a0b5-bbbb-cccc-dddd-aaaa0000000c
 # ╟─c5eb626e-d6ff-473a-8adc-92ba2cdb10b1
 # ╠═1e58cbed-8302-4c65-a79c-5ea3fabc1c1c
 # ╟─ba48d31e-046a-48d5-a9e4-ac4117dd4855
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa0000000d
+# ╠═30d4a0b5-bbbb-cccc-dddd-aaaa0000000e
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa0000000f
+# ╠═30d4a0b5-bbbb-cccc-dddd-aaaa00000010
 # ╟─30d4a0b5-bbbb-cccc-dddd-500000000001
 # ╠═30d4a0b5-bbbb-cccc-dddd-500000000002
 # ╟─30d4a0b5-bbbb-cccc-dddd-500000000003

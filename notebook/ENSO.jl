@@ -292,8 +292,8 @@ md"""
 Same time series as the official NOAA Niño 3.4 index, redrawn with
 warm phases (red fill above zero) and cool phases (blue fill below
 zero). Dashed horizontal lines mark the operational $\pm 0.5$ °C
-thresholds for El Niño and La Niña classification. The major events
-sit head and shoulders above the threshold.
+thresholds for El Niño and La Niña classification. The five labeled
+events clear the threshold by a factor of three or more.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000006
@@ -886,8 +886,8 @@ direction.
 The **right panel** zooms in on a single 4-year cycle (Jan 1996 – Dec
 1999): the climate state climbs into the warm phase during 1997, peaks
 at the Dec 1997 super-El-Niño in the lower right, then unwinds through
-the strong 1998–99 La Niña along a different path on the manifold.
-**This is the recharge oscillator drawn in state space.**
+the strong 1998–99 La Niña along a *different* path on the manifold.
+This is Jin's 1997 recharge oscillator, drawn in state space.
 **P5 passes.**
 
 #### What does the horseshoe geometrically *mean*?
@@ -1514,12 +1514,15 @@ The method-stacking robustness check (time-delay diffusion maps) failed,
 diagnosed as distance concentration in high dimensions plus
 eigenfunction reordering, and the failure is reported, not buried.
 
-The deeper takeaway, beyond ENSO specifically: **the same
-operator-theoretic toolkit recovers low-dimensional structure in
-high-dimensional climate data and high-dimensional neural data**.
-The mathematical content of "recovering an attractor" is shared
-between climate dynamics and computational neuroscience. The data
-substrate doesn't change the math.
+The reason this project sits in the same course as neural-manifolds
+work: PCA, diffusion maps, LIM, and the wavelet are all spectral
+decompositions of operators, the empirical covariance, the Markov
+transition matrix, the linear propagator, the time-frequency
+representation. Any sufficiently structured sampled dynamical system
+admits all four. The same toolkit that recovers an attractor in 75
+years of SST data recovers an attractor in a few hours of
+multi-electrode neural recordings, and that's the cross-substrate
+content of "recovering an attractor."
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000020

@@ -13,7 +13,7 @@ Top-5 explained variance: [0.401, 0.155, 0.082, 0.043, 0.038]
 α=0.5:  ρ(Ψ₂)=0.937
 α=1.0:  ρ(Ψ₂)=0.923
 
-## P6, P7 — time-delay embedding (HONEST NEGATIVE RESULT)
+## P6, P7 — time-delay embedding (predicted improvement; observed degradation)
 k= 0:  ρ(Ψ₂') raw=0.923  PC=0.909  max_raw=0.923  max_PC=0.909
 k= 3:  ρ(Ψ₂') raw=0.868  PC=0.854  max_raw=0.868  max_PC=0.854
 k= 6:  ρ(Ψ₂') raw=0.755  PC=0.742  max_raw=0.755  max_PC=0.742

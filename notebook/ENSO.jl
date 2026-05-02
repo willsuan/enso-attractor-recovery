@@ -253,14 +253,18 @@ let
 				  colormap = :RdBu_11, colorrange = (-3.5, 3.5))
 	Colorbar(fig[1, 2], hm; label = "SST anomaly (°C)")
 
-	for (yr, label) in [(1972.9, "1972 El Niño"),
-						(1982.9, "1982-83 El Niño"),
-						(1997.9, "1997-98 super-El-Niño"),
-						(2015.9, "2015-16 El Niño"),
-						(1988.9, "1988 La Niña"),
-						(1998.9, "1998-99 La Niña")]
+	# Label a small set of marquee events on the heat map. Years that sit
+	# close together (1997-98 vs 1998-99, 1982-83 vs the surrounding years)
+	# are skipped to keep the labels readable.
+	for (yr, label) in [(1972.7, "1972 El Niño"),
+						(1982.7, "1982-83 El Niño"),
+						(1988.7, "1988 La Niña"),
+						(1997.7, "1997-98 El Niño"),
+						(2015.7, "2015-16 El Niño"),
+						(2023.7, "2023 El Niño")]
 		text!(ax, 130, yr; text = label, color = :white,
-			  fontsize = 10, font = :bold)
+			  fontsize = 11, font = :bold,
+			  strokecolor = :black, strokewidth = 1.5)
 	end
 	fig
 end
@@ -998,15 +1002,25 @@ let
 	scatter!(ax, Ψ1[top10, 1], Ψ1[top10, 2];
 			 color = :crimson, markersize = 14,
 			 strokecolor = :black, strokewidth = 0.5)
-	for i in top10
-		text!(ax, Ψ1[i, 1] + 0.012, Ψ1[i, 2];
-			  text = Dates.format(Date(time_w[i]), "u 'yy"),
-			  fontsize = 9, color = :black)
-	end
 	scatter!(ax, [Ψ1[dec97_idx, 1]], [Ψ1[dec97_idx, 2]];
-			 color = :black, markersize = 22, marker = :star5)
-	text!(ax, Ψ1[dec97_idx, 1] + 0.012, Ψ1[dec97_idx, 2] - 0.015;
-		  text = "  Dec 1997 (query)", fontsize = 12, font = :bold)
+			 color = :black, markersize = 24, marker = :star5)
+	text!(ax, Ψ1[dec97_idx, 1] - 0.02, Ψ1[dec97_idx, 2] - 0.04;
+		  text = "Dec 1997 (query)", fontsize = 12, font = :bold,
+		  align = (:right, :top))
+
+	# Rather than labelling every point (which overlap badly when neighbours
+	# cluster), list the 10 months in an annotation box. The visual point is
+	# the *clustering*; the identity of each month is secondary.
+	months_str = join([Dates.format(Date(time_w[i]), "u yyyy") for i in top10], ", ")
+	# Wrap to two lines around the comma after the 5th entry.
+	parts = split(months_str, ", ")
+	line1 = join(parts[1:5], ", ")
+	line2 = join(parts[6:end], ", ")
+	xmin, xmax = extrema(Ψ1[:, 1])
+	ymax = maximum(Ψ1[:, 2])
+	text!(ax, xmin + 0.02, ymax;
+		  text = "10 nearest neighbours of Dec 1997:\n" * line1 * ",\n" * line2,
+		  fontsize = 11, font = :regular, align = (:left, :top))
 	fig
 end
 
@@ -1016,14 +1030,21 @@ let
 	Ψ1 = α1.Ψ
 	xs = Ψ1[:, 1]; ys = Ψ1[:, 2]
 
-	nb = 32
-	xrng = range(minimum(xs) - 0.05, maximum(xs) + 0.05; length = nb + 1)
-	yrng = range(minimum(ys) - 0.05, maximum(ys) + 0.05; length = nb + 1)
+	nb = 36
+	xrng = range(minimum(xs) - 0.02, maximum(xs) + 0.02; length = nb + 1)
+	yrng = range(minimum(ys) - 0.02, maximum(ys) + 0.02; length = nb + 1)
 	Hd = zeros(nb, nb)
 	for k in 1:length(xs)
 		i = clamp(searchsortedlast(xrng, xs[k]), 1, nb)
 		j = clamp(searchsortedlast(yrng, ys[k]), 1, nb)
 		Hd[i, j] += 1
+	end
+	# Smooth the histogram with a 3x3 box filter for cleaner contours.
+	Hs = copy(Hd)
+	for j in 2:nb-1, i in 2:nb-1
+		Hs[i, j] = (Hd[i-1, j-1] + Hd[i, j-1] + Hd[i+1, j-1] +
+		            Hd[i-1, j  ] + Hd[i, j  ] + Hd[i+1, j  ] +
+		            Hd[i-1, j+1] + Hd[i, j+1] + Hd[i+1, j+1]) / 9
 	end
 	xc = (xrng[1:end-1] .+ xrng[2:end]) ./ 2
 	yc = (yrng[1:end-1] .+ yrng[2:end]) ./ 2
@@ -1031,12 +1052,18 @@ let
 	fig = Figure(size = (950, 700))
 	ax = Axis(fig[1, 1];
 			  title = "Phase-portrait state density + Niño 3.4-coloured points",
-			  xlabel = "Ψ₂", ylabel = "Ψ₃")
-	contourf!(ax, xc, yc, Hd; colormap = :viridis,
-			  levels = range(0, maximum(Hd); length = 8))
+			  xlabel = "Ψ₂", ylabel = "Ψ₃",
+			  backgroundcolor = :white)
+	# Levels start above 0 so empty bins stay blank instead of painting the
+	# whole axis dark; ramp through warm tones so density reads at a glance.
+	hmax = maximum(Hs)
+	contourf!(ax, xc, yc, Hs;
+			  colormap = cgrad(:matter, rev = false),
+			  levels = range(0.4, hmax; length = 7),
+			  extendlow = :transparent)
 	sct = scatter!(ax, xs, ys; color = nino34, colormap = :RdBu_11,
 				   colorrange = (-2.5, 2.5), markersize = 5,
-				   strokecolor = (:white, 0.4), strokewidth = 0.3)
+				   strokecolor = (:black, 0.5), strokewidth = 0.3)
 	Colorbar(fig[1, 2], sct; label = "Niño 3.4 (°C)")
 	fig
 end
@@ -1445,6 +1472,64 @@ high-dimensional climate data and high-dimensional neural data**.
 The mathematical content of "recovering an attractor" is shared
 between climate dynamics and computational neuroscience. The data
 substrate doesn't change the math.
+"""
+
+# ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000020
+md"""
+## 9, Works cited
+
+Ashok, K., Behera, S. K., Rao, S. A., Weng, H., & Yamagata, T. (2007).
+El Niño Modoki and its possible teleconnection.
+*Journal of Geophysical Research*, **112**, C11007.
+
+Bjerknes, J. (1969). Atmospheric teleconnections from the equatorial
+Pacific. *Monthly Weather Review*, **97**(3), 163–172.
+
+Burgers, G., Jin, F.-F., & van Oldenborgh, G. J. (2005).
+The simplest ENSO recharge oscillator.
+*Geophysical Research Letters*, **32**, L13706.
+
+Coifman, R. R., & Lafon, S. (2006). Diffusion maps.
+*Applied and Computational Harmonic Analysis*, **21**(1), 5–30.
+
+Eckart, C., & Young, G. (1936). The approximation of one matrix by
+another of lower rank. *Psychometrika*, **1**(3), 211–218.
+
+Huang, B., Thorne, P. W., Banzon, V. F., Boyer, T., Chepurin, G.,
+Lawrimore, J. H., et al. (2017). Extended Reconstructed Sea Surface
+Temperature, Version 5 (ERSSTv5): Upgrades, validations, and
+intercomparisons.
+*Journal of Climate*, **30**(20), 8179–8205.
+
+Jin, F.-F. (1997). An equatorial ocean recharge paradigm for ENSO.
+Part I: Conceptual model.
+*Journal of the Atmospheric Sciences*, **54**(7), 811–829.
+
+Lorenz, E. N. (1956). Empirical orthogonal functions and statistical
+weather prediction.
+*Statistical Forecasting Project Scientific Report No. 1*,
+MIT Department of Meteorology.
+
+Mante, V., Sussillo, D., Shenoy, K. V., & Newsome, W. T. (2013).
+Context-dependent computation by recurrent dynamics in prefrontal
+cortex. *Nature*, **503**(7474), 78–84.
+
+Pandarinath, C., O'Shea, D. J., Collins, J., Jozefowicz, R.,
+Stavisky, S. D., Kao, J. C., et al. (2018). Inferring single-trial
+neural population dynamics using sequential auto-encoders.
+*Nature Methods*, **15**(10), 805–815.
+
+Penland, C., & Sardeshmukh, P. D. (1995). The optimal growth of
+tropical sea surface temperature anomalies.
+*Journal of Climate*, **8**(8), 1999–2024.
+
+Takens, F. (1981). Detecting strange attractors in turbulence. In
+*Dynamical Systems and Turbulence, Warwick 1980*
+(Lecture Notes in Mathematics, vol. 898, pp. 366–381). Springer.
+
+Torrence, C., & Compo, G. P. (1998). A practical guide to wavelet
+analysis. *Bulletin of the American Meteorological Society*,
+**79**(1), 61–78.
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -3423,5 +3508,6 @@ version = "4.1.0+0"
 # ╠═30d4a0b5-bbbb-cccc-dddd-200000000003
 # ╟─30d4a0b5-bbbb-cccc-dddd-200000000004
 # ╟─5239ef9c-6555-433a-a749-79cf136aff0e
+# ╟─30d4a0b5-bbbb-cccc-dddd-aaaa00000020
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

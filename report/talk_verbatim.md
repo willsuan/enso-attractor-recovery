@@ -46,7 +46,7 @@ and the matrix logarithm.
 
 ---
 
-## 0:45 to 1:15, Section 1, Data
+## 0:45 to 1:45, Section 1, Data
 
 ▸ Scroll to "## 1, Data: NOAA ERSSTv5 monthly SST".
 
@@ -59,14 +59,39 @@ one-twenty east to eighty west, at two-degree resolution. About
 twenty-three hundred valid sea cells.
 
 For validation, I use NOAA's official Niño 3.4 index. To be clear:
-this is validation only. It is never an input to either method.
+this is validation only. It is never an input to any of the three
+methods.
 
-▸ Scroll past the data-loading cells. The summary tuple at the top
-should show "T = 900, lat = 31, lon = 80".
+▸ Scroll past the data-loading cells to the "Sample months" figure.
+
+Three monthly snapshots of the data we're working with: the December
+1997 super-El-Niño on the left, a near-neutral January 1989 in the
+middle, and the December 1999 La Niña on the right. Same colormap,
+same range, dashed Niño 3.4 box on each. **This is what one row of
+our T-by-N data matrix looks like when reshaped onto the lat-lon
+grid.**
+
+▸ Scroll to the Hovmöller diagram.
+
+Equatorial-band SST anomaly through time, longitude on the x-axis,
+year on the y-axis, 75 years stacked vertically. **One picture
+summarises the data we're trying to recover.** Every El Niño appears
+as a horizontal red band, the 1972, 1982-83, 1997-98, 2015-16, and
+2023 events labeled. La Niñas appear as cool blue bands. The
+westward-marching warm tongue and the eastern-Pacific peak are both
+visible.
+
+▸ Scroll to the banded Niño 3.4 figure.
+
+The validation index, NOAA Niño 3.4, banded by ENSO phase: red fills
+above zero, blue fills below. Dashed thresholds at plus and minus
+zero point five degrees mark El Niño and La Niña classification.
+The five strongest events stand head and shoulders above the
+threshold.
 
 ---
 
-## 1:15 to 1:45, Section 2, Predictions
+## 1:45 to 2:15, Section 2, Predictions
 
 ▸ Scroll to the predictions table, "## 2, Predictions made before
 running anything".
@@ -86,7 +111,7 @@ falsifiable and have explicit failure thresholds.
 
 ---
 
-## 1:45 to 2:30, Section 3, Method 1 PCA
+## 2:15 to 3:00, Section 3, Method 1 PCA
 
 ▸ Scroll to "## 3, Method 1: Principal Component Analysis (in-course)".
 
@@ -109,7 +134,7 @@ The output line at the top of the cell shows the correlation:
 
 ---
 
-## 2:30 to 3:30, EOF 1 and PC 1 figures
+## 3:00 to 4:00, EOF 1, PC 1, and EOFs 2-4
 
 ▸ Scroll to the EOF 1 figure (subsection "EOF 1, the leading spatial
 mode"). The map fills the cell.
@@ -132,9 +157,18 @@ The black stars mark the strongest historical El Niños, '72, '82,
 This is **Lecture 18, Patterns**, in action: the leading EOF is a
 literal pattern of the leading climate mode.
 
+▸ Scroll to the four-panel "Higher-order EOFs" figure.
+
+Briefly, EOFs two through four. EOF 1 captured forty percent of the
+variance. EOF 2, fifteen percent, is a Pacific Decadal Oscillation-like
+mode. EOF 3, eight percent, has a different equatorial structure
+sometimes called the Modoki pattern. EOF 4, four percent, is
+mid-latitude. The point: PCA does see structure beyond ENSO, just
+nothing else of comparable amplitude.
+
 ---
 
-## 3:30 to 4:30, Section 4, Method 2 DMAP
+## 4:00 to 4:45, Section 4, Method 2 DMAP
 
 ▸ Scroll to "## 4, Method 2: Anisotropic Diffusion Maps (out-of-course)".
 
@@ -169,37 +203,59 @@ physically motivated choice. We use it as the primary value.
 
 ---
 
-## 4:30 to 5:00, DMAP scatter and the diffusion-time slider
+## 4:45 to 5:00, DMAP slider and α-family
 
-▸ Scroll to the alpha + diffusion-time scatter plot. Demonstrate the
-slider live: drag t from 0.5 to 3.
+▸ Scroll to the alpha selector and diffusion-time slider. Show the
+"Selected α = 1.0, t = 1" line below.
 
-Below the scatter, the cell shows the live correlation badge: rho of
-Psi-two against Niño 3.4 is around **zero point nine two three**,
-matching PCA. **P3 passes.**
+The selector lets us pick alpha live; we leave it at one. The slider
+controls diffusion time t, raising eigenvalues to the t-th power.
+Default t equals one.
 
-The slider lets us watch the embedding sharpen as we increase
-diffusion time t, raising eigenvalues to the t-th power amplifies the
-gap between slow and fast modes. The default t equals one.
+Below the scatter the cell shows the live correlation badge: rho of
+Psi-two against Niño 3.4 is **zero point nine two three**, matching
+PCA. **P3 passes.**
 
 ---
 
-## 5:00 to 5:30, DMAP eigenvalue spectrum
+## 5:00 to 5:15, DMAP eigenvalue spectrum
 
 ▸ Scroll to "### Eigenvalue spectrum (P4)".
 
 A clear gap in the eigenvalue spectrum: lambda 2 around zero point
-four seven, well separated from the trivial lambda 1. Reading further
-into the spectrum gives an intrinsic-dimension estimate of about
-**five**, consistent with the recharge-oscillator-plus-Modoki count
-from the climate-dynamics literature. **P4 passes.**
+four seven, well separated from the trivial lambda 1. The eigenvalues
+decay smoothly through about five slow modes before steeply dropping,
+consistent with the recharge-oscillator-plus-Modoki count from the
+climate-dynamics literature. **P4 passes.**
 
 Note this is something **PCA's variance scree cannot give us**, the
 DMAP eigenvalue spectrum has a kink, and it counts modes.
 
 ---
 
-## 5:30 to 6:30, Phase portrait, P5
+## 5:15 to 5:45, Kernel matrix and nearest neighbors
+
+▸ Scroll to "### What the kernel actually sees: the affinity matrix".
+
+This is the nine hundred by nine hundred pairwise affinity matrix
+K-epsilon, ordered chronologically on both axes. Bright off-diagonal
+patches are pairs of months in *different decades* whose SST patterns
+look similar. The leading eigenvectors of the row-normalised version
+of this matrix become Psi-two, Psi-three, and so on. **This is the
+literal object diffusion maps is reading geometry off of.**
+
+▸ Scroll to "### What does similar to Dec 1997 actually mean?".
+
+A pedagogical figure. I picked December 1997, the super-El-Niño peak,
+and pulled the ten months whose SST patterns are most similar to it
+under the Gaussian kernel. They cluster tightly in the warm corner of
+the manifold. Eight of them are 1997-98 months, two are December '82
+and January '83, the prior super-El-Niño. **The kernel encodes "two
+months in similar climate configurations have high affinity."**
+
+---
+
+## 5:45 to 6:30, Phase portrait, P5
 
 ▸ Scroll to "### Phase portrait, α = 1 ... and the (Ψ₂, Ψ₃)
 horseshoe". Both panels visible.
@@ -224,32 +280,51 @@ ENSO from Jin 1997, drawn in state space. **P5 passes.**
 
 ---
 
-## 6:30 to 7:00, 3-D and animations
+## 6:30 to 7:00, Density contours and seasonal phase-locking
 
-▸ Scroll to "### Beyond static figures: 3-D attractor and animated
-trajectory". Show Figure 11.
+▸ Scroll to "### Density contours: where does the climate state spend
+its time?".
 
-In three diffusion-map coordinates the attractor opens into a curved
-two-dimensional sheet wound through three-dimensional volume. The
-third coordinate Psi-four spreads out the El-Niño side of the
-manifold along an axis the two-dimensional projection collapses.
+The same Psi-two, Psi-three plane, with a two-dimensional occupancy
+estimate plotted as filled contours behind the points. Most of the
+climate state's time is spent in the central neutral region of the
+manifold. The warm El Niño and cool La Niña corners are visited
+rarely. **The shape of the high-density region is the climatological
+attractor in the Lebesgue sense, literally where probability piles up
+in the embedding.**
 
-▸ Scroll to the trajectory-animation cell, click play.
+▸ Scroll to "### Trajectory by month-of-year".
 
-The animation traces the climate state as a moving point through the
-embedding, two full ENSO cycles plus the 1997-98 super-El-Niño
-between 1990 and 2010. The synchronised Niño 3.4 panel on the right
-shows the same time series for context.
-
-▸ Scroll to the SST-anomaly animation cell, click play.
-
-The same evolution in raw spatial form, the warm tongue building
-along the equator through 1997, peaking in late 1997, then collapsing
-into the 1998 La Niña.
+The 1996-99 trajectory again, but this time coloured by month of year
+on a circular colormap. Notice how the climate state hits the warm
+corner in late boreal autumn, early winter each year. **This is the
+seasonal phase-locking of ENSO peaks**, ENSO events tend to mature
+between November and January, and the manifold makes it visible.
 
 ---
 
-## 7:00 to 7:30, Section 5, side-by-side method comparison
+## 7:00 to 7:15, 3-D attractor and the 1997-98 peak
+
+▸ Scroll to "### 3-D attractor and the 1997-98 peak". Show Figure 11.
+
+In three diffusion-map coordinates the attractor opens into a curved
+two-dimensional sheet wound through three-dimensional volume. The
+fourth coordinate Psi-four spreads out the El-Niño side along an axis
+the two-dimensional projection collapses.
+
+▸ Scroll past Figures 12 and 13, the Jan 1998 peak stills.
+
+Two stills showing the climate state at the January 1998 peak of the
+super-El-Niño, in the manifold (Figure 12) and in raw spatial form
+(Figure 13). The full animations live in `figures/`; in the manifold
+view the climate state has migrated to the warm corner, and in the
+spatial view the warm tongue stretches across the entire central-to-
+eastern equatorial Pacific. **The same climate state, two coordinate
+systems.**
+
+---
+
+## 7:15 to 7:45, Section 5, side-by-side method comparison
 
 ▸ Scroll to "## 5, Method comparison". The four-panel scatter is
 visible.
@@ -265,9 +340,9 @@ on the geometry around it.
 
 ---
 
-## 7:30 to 8:30, Section 5.5, Linear Inverse Model
+## 7:45 to 8:45, Section 5.5, Linear Inverse Model
 
-▸ Scroll to "## 5.5, A third method: Linear Inverse Model (LIM)".
+▸ Scroll to "## 5.5, Method 3: Linear Inverse Model (LIM)".
 
 PCA and diffusion maps are both *static* methods, they ignore time
 ordering. To extend the comparison along the *dynamics* axis I add
@@ -301,7 +376,7 @@ rate** that the static methods cannot give.
 
 ---
 
-## 8:30 to 8:50, Section 6, Permutation null
+## 8:45 to 9:00, Section 6, Permutation null
 
 ▸ Scroll to "## 6, Negative control: permutation null".
 
@@ -314,7 +389,7 @@ attributed to chance.
 
 ---
 
-## 8:50 to 9:20, Section 7, Method-stacking robustness check
+## 9:00 to 9:30, Section 7, Method-stacking robustness check
 
 ▸ Scroll to "## 7, Method-stacking robustness check: time-delay
 diffusion maps".
@@ -347,7 +422,7 @@ suffices for ENSO.
 
 ---
 
-## 9:20 to 9:45, Section 7.5, Wavelet spectrogram
+## 9:30 to 9:55, Section 7.5, Wavelet spectrogram
 
 ▸ Scroll to "## 7.5, Time-frequency check on PC 1". Show Figure 9.
 
@@ -370,7 +445,7 @@ spatial structure.
 
 ---
 
-## 9:45 to 10:00, Section 8, Summary
+## 9:55 to 10:30, Section 8, Summary, and Works cited
 
 ▸ Scroll to "## 8, Summary". The pass/fail table is visible.
 
@@ -395,6 +470,15 @@ high-dimensional neural data. The mathematical content of
 "recovering an attractor" is shared between climate dynamics and
 the computational neuroscience I'm interested in. The math doesn't
 care which substrate generated the data.
+
+▸ Scroll to "## 9, Works cited" at the bottom of the notebook to
+acknowledge the references on screen for ~5 seconds: Coifman and
+Lafon for diffusion maps, Penland and Sardeshmukh for LIM, Torrence
+and Compo for the wavelet treatment, Jin's recharge oscillator,
+Takens for the embedding theorem, plus Lorenz's 1956 EOF analysis,
+Mante-Sussillo and Pandarinath for the neural-manifolds analogy.
+Don't read each name aloud, just point and say "the full reference
+list is here".
 
 Thank you. I'm happy to take questions.
 

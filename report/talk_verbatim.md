@@ -56,15 +56,11 @@ and the matrix logarithm.
 
 The data is NOAA's Extended Reconstructed Sea-Surface Temperature
 version 5, ERSSTv5 for short. Monthly SST, reconstructed from in-situ
-observations, 1950 to 2024. That's 75 years, 900 monthly snapshots.
+observations, 1950 to 2024. 75 years, 900 monthly snapshots.
 
 I restricted to the tropical Pacific, thirty south to thirty north,
 one-twenty east to eighty west, at two-degree resolution. About
-twenty-three hundred valid sea cells.
-
-For validation, I use NOAA's official Niño 3.4 index. To be clear:
-this is validation only. It is never an input to any of the three
-methods.
+twenty-three hundred valid sea cells after land masking.
 
 ▸ Scroll past the data-loading cells to the "Sample months" figure.
 
@@ -72,8 +68,7 @@ Three monthly snapshots of the data we're working with: the December
 1997 super-El-Niño on the left, a near-neutral January 1989 in the
 middle, and the December 1999 La Niña on the right. Same colormap,
 same range, dashed Niño 3.4 box on each. This is what one row of
-our T-by-N data matrix looks like when you reshape it onto the
-lat-lon grid.
+our T-by-N data matrix looks like reshaped onto the lat-lon grid.
 
 ▸ Scroll to the Hovmöller diagram.
 
@@ -81,16 +76,15 @@ Equatorial-band SST anomaly through time. Longitude on the x-axis,
 year on the y-axis, 75 years stacked vertically. One picture
 summarising the whole dataset. Every El Niño appears as a horizontal
 red band, the 1972, 1982-83, 1997-98, 2015-16, and 2023 events
-labeled. La Niñas appear as cool blue bands. The westward-marching
-warm tongue and the eastern-Pacific peak are both visible.
+labeled. La Niñas appear as cool blue bands.
 
 ▸ Scroll to the banded Niño 3.4 figure.
 
-The validation index, NOAA Niño 3.4, banded by ENSO phase: red fills
+The validation index, NOAA Niño 3.4, banded by ENSO phase. Red fills
 above zero, blue fills below. Dashed thresholds at plus and minus
 zero point five degrees mark El Niño and La Niña classification.
-The five strongest events stand head and shoulders above the
-threshold.
+The five labeled events clear the threshold by a factor of three or
+more.
 
 ---
 
@@ -161,7 +155,6 @@ index").
 PC-1 over time, overlaid with the official Niño 3.4 index. The two
 curves are visually indistinguishable. The Pearson correlation is
 **zero point nine four six**, over 900 months from 1950 to 2024.
-
 The black stars mark the strongest historical El Niños, '72, '82,
 '97, 2015, 2023. Every one of them appears as a peak in both curves.
 
@@ -252,7 +245,7 @@ decay smoothly through about five slow modes before steeply dropping,
 consistent with the recharge-oscillator-plus-Modoki count from the
 climate-dynamics literature. **P4 passes.**
 
-Note this is something **PCA's variance scree cannot give us**, the
+Note this is something PCA's variance scree cannot give us. The
 DMAP eigenvalue spectrum has a kink, and it counts modes.
 
 ---
@@ -261,21 +254,23 @@ DMAP eigenvalue spectrum has a kink, and it counts modes.
 
 ▸ Scroll to "### What the kernel actually sees: the affinity matrix".
 
-This is the nine hundred by nine hundred pairwise affinity matrix
-K-epsilon, ordered chronologically on both axes. Bright off-diagonal
-patches are pairs of months in *different decades* whose SST patterns
-look similar. The leading eigenvectors of the row-normalised version
-of this matrix become Psi-two, Psi-three, and so on. **This is the
-literal object diffusion maps is reading geometry off of.**
+The 900-by-900 pairwise affinity matrix K-epsilon, ordered
+chronologically on both axes. Bright off-diagonal patches are pairs
+of months in *different decades* whose SST patterns look similar.
+The leading eigenvectors of the row-normalised version of this
+matrix become Psi-two, Psi-three, and so on. This is the object
+diffusion maps is literally reading geometry off of.
 
 ▸ Scroll to "### What does similar to Dec 1997 actually mean?".
 
-A pedagogical figure. I picked December 1997, the super-El-Niño peak,
-and pulled the ten months whose SST patterns are most similar to it
-under the Gaussian kernel. They cluster tightly in the warm corner of
-the manifold. Eight of them are 1997-98 months, two are December '82
-and January '83, the prior super-El-Niño. **The kernel encodes "two
-months in similar climate configurations have high affinity."**
+I picked December 1997, the super-El-Niño peak, and pulled the ten
+months whose SST patterns are most similar to it under the Gaussian
+kernel. They cluster tightly in the warm corner of the manifold,
+right next to Dec 1997 itself. Eight of them are 1997-98 months,
+two are December '82 and January '83, the prior super-El-Niño. The
+kernel encodes "two months in similar climate configurations have
+high affinity," and the spectral decomposition is then operating on
+that.
 
 ---
 
@@ -319,7 +314,7 @@ not in shape.
 ▸ Scroll to "### Density contours: where does the climate state spend
 its time?".
 
-The same Psi-two, Psi-three plane, with a 2-D occupancy estimate
+Same Psi-two / Psi-three plane, with a 2-D occupancy estimate
 plotted as filled contours behind the points. Most of the climate
 state's time is spent in the central neutral region. The warm El
 Niño and cool La Niña corners are visited rarely. The shape of the
@@ -342,18 +337,15 @@ January, and the manifold makes it visible.
 
 In three diffusion-map coordinates the attractor opens into a curved
 two-dimensional sheet wound through three-dimensional volume. The
-fourth coordinate Psi-four spreads out the El-Niño side along an axis
-the two-dimensional projection collapses.
+fourth coordinate Psi-four spreads out the El-Niño side along an
+axis the two-dimensional projection collapses.
 
 ▸ Scroll past Figures 12 and 13, the Jan 1998 peak stills.
 
-Two stills showing the climate state at the January 1998 peak of
-the super-El-Niño, in the manifold (Figure 12) and in raw spatial
-form (Figure 13). The animations live in `figures/`. In the manifold
-view the climate state has migrated to the warm corner. In the
-spatial view the warm tongue stretches across the entire
-central-to-eastern equatorial Pacific. Same climate state, two
-coordinate systems.
+The same climate state at the January 1998 peak of the super-El-Niño,
+in two coordinate systems: the manifold (Figure 12) and the raw
+spatial domain (Figure 13). The animations live in `figures/` for
+anyone running the live notebook.
 
 ---
 
@@ -362,21 +354,15 @@ coordinate systems.
 ▸ Scroll to "## 5, Method comparison". The four-panel scatter is
 visible.
 
-To make the contrast between the two methods literal, here are the
-same nine hundred months in the four embeddings, side by side, all
-coloured by the same Niño 3.4 scale.
+Same 900 months in four embeddings, side by side, all coloured by
+the same Niño 3.4 scale. PCA on the left is a featureless cloud,
+the variance is one-dimensional. The three DMAP panels show the
+horseshoe sharpening as alpha goes from zero to one.
 
-PCA's PC-1 versus PC-2 plane on the left: a featureless cloud. All
-the variance is along PC-1, the second is just orthogonal noise. The
-three diffusion-map panels show the same data as a *curved manifold*,
-and the curvature gets cleaner as alpha goes from zero to one. At
-alpha equals one, the horseshoe is unambiguous, La Niña on the cool
-end, El Niño on the warm end.
-
-Both methods agree on the leading axis. The correlations with Niño
-3.4 in the table below are all in the 0.92 to 0.95 range. They
-disagree on the geometry around that axis, and that disagreement is
-the geometric content the in-course method cannot reach.
+Correlations against Niño 3.4 in the table below are all between 0.92
+and 0.95. Agreement on the leading axis. The geometry around it is
+where they disagree, and that disagreement is the content PCA cannot
+reach.
 
 ---
 
@@ -414,7 +400,7 @@ of fitting to Niño 3.4.
 
 The right panel: the LIM mode time series overlaid with Niño 3.4.
 Correlation is zero point six one, lower than PCA's zero point nine
-five. That's expected. Niño 3.4 is a 1-D scalar; LIM's natural
+five. That's expected: Niño 3.4 is a 1-D scalar; LIM's natural
 representation is a 2-D oscillator (the complex eigenpair has an
 in-phase and a quadrature component). Projecting onto one axis
 loses half the information. The point of LIM is not the correlation,
@@ -457,15 +443,14 @@ preprocess with one technique then apply another. The particular
 stack I tested is Takens' embedding theorem followed by diffusion
 maps.
 
-**Takens 1981** is a remarkable theorem: a smooth flow on a
-``d``-dimensional attractor can be reconstructed from a single
-generic scalar observable, just by stacking time-delayed copies. So
-plausibly, replacing each monthly snapshot ``x_t`` with the
-delay-vector ``[x_t,\, x_{t-\tau},\, \dots,\, x_{t-k\tau}]`` should
-give DMAP more dynamical context per point and *improve* the
-recovery. This is also the standard rationale for delay embeddings
-in computational neuroscience (Mante–Sussillo, Pandarinath), so I
-had a personal stake in seeing it work.
+**Takens 1981.** A smooth flow on a ``d``-dimensional attractor can
+be reconstructed from a single generic scalar observable, just by
+stacking time-delayed copies. So plausibly, replacing each monthly
+snapshot ``x_t`` with the delay-vector ``[x_t,\, x_{t-\tau},\, \dots,
+\, x_{t-k\tau}]`` should give DMAP more dynamical context per point
+and *improve* the recovery. This is also the standard rationale for
+delay embeddings in computational neuroscience (Mante–Sussillo,
+Pandarinath), so I had a personal stake in seeing it work.
 
 ▸ Show the delay-sweep figure.
 
@@ -523,41 +508,24 @@ as the right spatial structure.
 
 ▸ Scroll to "## 8, Summary". The pass/fail table is visible.
 
-So back to the question at the start. The claim was that tropical
+Back to the question at the start. The claim was that tropical
 Pacific climate lives on a low-dimensional attractor, and ENSO is
 its dominant mode. Four methods, none of them given Niño 3.4 as
-input, all confirm it.
+input, all confirm it: the **spatial** horseshoe via PCA
+(**Lecture 17**), the **curved geometry** via diffusion maps, the
+**dynamics** via LIM (**Lecture 11**), the **temporal** band via the
+Morlet wavelet (**Lectures 15 and 27**). Five of seven predictions
+pass; P6 and P7 fail, in the diagnostic way we just walked through.
 
-PCA recovered the spatial horseshoe at correlation 0.946. That's
-**Lecture 17**.
-
-Anisotropic diffusion maps recovered the same axis at 0.923, and
-also showed the curved geometry of the attractor that PCA cannot
-see, including the El Niño / La Niña asymmetry.
-
-The Linear Inverse Model recovered ENSO's dynamics: a damped
-oscillator with period 3.1 years and e-folding decay 8 months. Both
-numbers match the published-LIM literature. That's the **Lecture 11**
-connection.
-
-The Morlet wavelet spectrogram confirmed the temporal structure:
-power concentrated in the 2 to 7 year ENSO band. **Lectures 15 and
-27**.
-
-Five of seven predictions passed. P6 and P7 failed: stacking Takens'
-delay embedding on top of DMAP didn't help, it actively hurt. That's
-useful to know, and the only reason we know it cleanly is that the
-prediction was on the table before we ran the sweep.
-
-The reason this project is in the same course as neural-manifolds
+The reason this project sits in the same course as neural-manifolds
 work: PCA, diffusion maps, LIM, the wavelet are not climate-specific
-tricks. Each one is a spectral decomposition of an operator
-(covariance, transition matrix, propagator, time-frequency
-representation), and any sufficiently structured sampled dynamical
-system admits all four. The same toolkit that recovers an attractor
-in 75 years of SST data recovers an attractor in a few hours of
-neural recordings. The math doesn't care which substrate generated
-the data, and that's the part I find genuinely exciting.
+tricks. Each one is a spectral decomposition of an operator: the
+covariance, the transition matrix, the propagator, the time-frequency
+representation. Any sufficiently structured sampled dynamical system
+admits all four. The same toolkit that recovers an attractor in
+seventy-five years of SST data recovers an attractor in a few hours
+of neural recordings. The math doesn't care which substrate
+generated the data, and that's the part I find genuinely exciting.
 
 ▸ Scroll to "## 9, Works cited" at the bottom of the notebook to
 acknowledge the references on screen for ~5 seconds: Coifman and

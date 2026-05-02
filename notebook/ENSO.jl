@@ -84,6 +84,12 @@ All algorithms are written from scratch; only `LinearAlgebra.svd`,
 # ╔═╡ a51c45f4-1f89-45e8-9967-b5b4c3bc6835
 md"""
 ## 0, Setup
+
+Imports the standard libraries and includes the project source modules
+from `../src/` (PCA, diffusion maps, delay embedding). All algorithms
+are implemented from scratch; the only library primitives we rely on
+are `LinearAlgebra.svd`, `LinearAlgebra.eigen`, and the matrix
+logarithm.
 """
 
 # ╔═╡ 545ecb96-47c5-44f2-82ed-178441e4b0ee
@@ -567,7 +573,12 @@ spectra is itself an answer to "what does each method see?"
 
 # ╔═╡ c5eb626e-d6ff-473a-8adc-92ba2cdb10b1
 md"""
-### Phase portrait, α = 1 (Laplace–Beltrami) and the $(\Psi_2, \Psi_3)$ horseshoe
+### Phase portrait, α = 1 (Laplace–Beltrami) and the (Ψ₂, Ψ₃) horseshoe
+
+The portrait below is fixed at α = 1 (the physically motivated
+Laplace–Beltrami choice) regardless of the slider above; the slider
+controls only the eigenvalue spectrum and the side-by-side comparison
+later on.
 """
 
 # ╔═╡ 1e58cbed-8302-4c65-a79c-5ea3fabc1c1c
@@ -709,8 +720,9 @@ that the official index measures.
 md"""
 ## 5, Method comparison
 
-A side-by-side scatter of all four methods coloured by Niño 3.4. Watch
-how much *curvature* each method preserves.
+A side-by-side scatter of the four embeddings (PCA, plus DMAP at α =
+0, 1/2, 1) coloured by Niño 3.4. Watch how much *curvature* each
+method preserves.
 """
 
 # ╔═╡ dddbef5c-830b-4c67-816d-3e0d21e2288b
@@ -769,7 +781,7 @@ Numerical correlations:
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-400000000001
 md"""
-## 5.5, A third method: Linear Inverse Model (LIM)
+## 5.5, Method 3: Linear Inverse Model (LIM)
 
 PCA and DMAP are both *static state-space* methods, they ignore time-
 ordering. To extend the comparison along the *dynamics* axis we add a
@@ -893,8 +905,8 @@ end
 
 # ╔═╡ c38ddd37-0dfc-43fa-bf05-b6e5cea6b9e2
 md"""
-The real correlations are roughly **45 standard deviations above** the
-permutation null. The recovery cannot be attributed to chance.
+PC 1 sits about **46σ** above the null and Ψ₂ about **43σ** above its
+null distribution. The recovery cannot be attributed to chance.
 """
 
 # ╔═╡ 7a9ae0e7-0382-4f81-aab0-b8b42bbab1e8
@@ -1072,23 +1084,26 @@ md"""
 | P7 ρ monotone in k | decreasing | **FAIL** |
 | Permutation null | 46σ / 43σ above null | PASS |
 
-**Headline:** three methods, three orthogonal pieces of ENSO's signature.
+**Headline:** three methods plus a spectrogram, four orthogonal pieces of
+ENSO's signature.
 
 * **PCA / EOF analysis** recovers the canonical *spatial* ENSO mode:
  the warm equatorial tongue and subtropical horseshoe pattern, with
  PC 1 correlating with Niño 3.4 at $\rho = 0.946$.
 * **Anisotropic diffusion maps** recovers the same axis at $\rho = 0.923$
  *and* reveals the *curved geometry* of the climate attractor in
- $(\Psi_2, \Psi_3)$ that PCA's projection cannot see. The methods
- agree on the leading mode and disagree on the shape around it.
+ (Ψ₂, Ψ₃) that PCA's projection cannot see. The methods agree on the
+ leading mode and disagree on the shape around it.
 * **The Linear Inverse Model** recovers the *dynamical signature*:
  ENSO as a damped 3-year oscillator with 8-month e-folding decay,
  matching the published-LIM-literature range.
+* **The Morlet wavelet spectrogram** of PC 1 confirms the temporal
+ structure: power concentrated in the 3–7 yr ENSO band, with the
+ 1997–98 super-El-Niño as the strongest excursion.
 
-Together with the wavelet spectrogram (3–7 yr power band), these
-four checks reproduce the canonical climate-physics description of
-ENSO from four orthogonal directions, all unsupervised. The
-method-stacking robustness check (time-delay diffusion maps) failed,
+Together these four checks reproduce the canonical climate-physics
+description of ENSO from four orthogonal directions, all unsupervised.
+The method-stacking robustness check (time-delay diffusion maps) failed,
 diagnosed as distance concentration in high dimensions plus
 eigenfunction reordering, and the failure is reported, not buried.
 

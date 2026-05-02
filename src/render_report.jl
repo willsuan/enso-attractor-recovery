@@ -1,13 +1,10 @@
-# Render the markdown report into a self-contained HTML file
-# using marked.js + MathJax for in-browser markdown + math rendering.
-# Open the resulting file and use the browser's "Print → Save as PDF".
+# Render the markdown report into a self-contained HTML via marked.js +
+# MathJax. Open the result in a browser and Print -> Save as PDF.
 
 const REPORT_MD   = joinpath(@__DIR__, "..", "report", "report.md")
 const REPORT_HTML = joinpath(@__DIR__, "..", "report", "report.html")
 
-# Read raw markdown — escape anything that would break a JS string literal
 md = read(REPORT_MD, String)
-# JSON-escape: backslash and backtick (template literals in JS use backticks)
 md_escaped = replace(md,
     "\\" => "\\\\",
     "`"  => "\\`",
@@ -19,7 +16,7 @@ html = """
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>GEO 384H Final — Linear vs Nonlinear Spectral Embeddings of an AVIRIS hyperspectral cube</title>
+<title>GEO 384H Final, Recovering the ENSO Attractor</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=JetBrains+Mono&display=swap');
 html { -webkit-print-color-adjust: exact; }

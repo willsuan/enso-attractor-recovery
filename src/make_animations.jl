@@ -43,9 +43,7 @@ end
 
 years = [Dates.year(Date(t)) + (Dates.month(Date(t)) - 1) / 12 for t in time_w]
 
-# ============================================================
 # Figure 11: Static 3D scatter of the attractor (Ψ₂, Ψ₃, Ψ₄)
-# ============================================================
 println("\nFig 11: 3D attractor scatter")
 let
     fig = Figure(size = (1100, 900))
@@ -71,10 +69,8 @@ let
     save(joinpath(FIGDIR, "fig11_attractor3d.png"), fig)
 end
 
-# ============================================================
 # Figure 12 (animation): Phase-portrait trajectory tracing,
 # 1990-2010, showing two full ENSO cycles travelled by the data.
-# ============================================================
 println("\nFig 12: Animated phase-portrait trajectory (1990-2010)")
 let
     cs = findfirst(==(Date(1990, 1, 1)), Date.(time_w))
@@ -129,10 +125,8 @@ let
     end
 end
 
-# ============================================================
 # Figure 13 (animation): SST anomaly map evolving 1996-2000,
 # the build-up, peak, and decay of the 1997-98 super-El Niño.
-# ============================================================
 println("\nFig 13: Animated SST anomaly map (1996-2000)")
 let
     cs = findfirst(==(Date(1996, 1, 1)), Date.(time_w))

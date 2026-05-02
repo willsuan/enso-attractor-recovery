@@ -24,9 +24,7 @@ for f in readdir(FIGDIR; join=true)
     end
 end
 
-# ============================================================
 # Reload data + run analysis (compact version of enso_analysis.jl)
-# ============================================================
 println("Loading + preprocessing...")
 sst, lat_all, lon_all, time_all = load_ersst()
 keep = findall(t -> Date(1950,1,1) <= Date(t) <= Date(2024,12,31), time_all)
@@ -140,9 +138,7 @@ for _ in 1:500
     push!(chance_DM, abs(cor(Ψ[valid_n, 1], p)))
 end
 
-# ============================================================
 # 1.  EOF1 spatial pattern + PC1 time series  (P1, P2)
-# ============================================================
 println("\nFig 1: EOF1 spatial pattern")
 
 function eof_grid(eof_vec, mask, weights)
@@ -161,7 +157,7 @@ end
 let
     fig = Figure(size = (1100, 480), backgroundcolor=:white)
     ax = Axis(fig[1, 1];
-        title  = "EOF 1 — leading mode of tropical Pacific SST anomalies",
+        title  = "EOF 1, leading mode of tropical Pacific SST anomalies",
         xlabel = "longitude (°E)", ylabel = "latitude (°N)",
         aspect = 2.5)
     G = eof_grid(EOF[:, 1], mask, weights)
@@ -184,9 +180,7 @@ let
     save(joinpath(FIGDIR, "fig01_eof1.png"), fig)
 end
 
-# ============================================================
 # 2.  PC 1 vs Niño 3.4 time series  (P2)
-# ============================================================
 println("Fig 2: PC1 vs Niño 3.4 overlay")
 let
     fig = Figure(size = (1300, 380))
@@ -219,15 +213,13 @@ let
     save(joinpath(FIGDIR, "fig02_pc1_nino34.png"), fig)
 end
 
-# ============================================================
 # 3.  DMAP eigenvalues + α-family side-by-side scatter
-# ============================================================
 println("Fig 3: DMAP eigenvalues + α-family scatters")
 let
     fig = Figure(size = (1500, 700))
 
     # Eigenvalue spectra (top row, full width)
-    ax = Axis(fig[1, 1:4]; title = "Diffusion-map eigenvalues |λₖ| — α-family",
+    ax = Axis(fig[1, 1:4]; title = "Diffusion-map eigenvalues |λₖ|, α-family",
         xlabel = "k", ylabel = "|λₖ|")
     cols = Dict(0.0 => :gray, 0.5 => :darkorange, 1.0 => :teal)
     for α in (0.0, 0.5, 1.0)
@@ -260,9 +252,7 @@ let
     save(joinpath(FIGDIR, "fig03_eigenvalues_alpha_scatter.png"), fig)
 end
 
-# ============================================================
 # 4.  Phase portrait (Ψ₂, Ψ₃) with monthly trajectory  (P5)
-# ============================================================
 println("Fig 4: phase portrait + trajectory")
 let
     fig = Figure(size = (1300, 500))
@@ -312,9 +302,7 @@ let
     save(joinpath(FIGDIR, "fig04_phase_portrait.png"), fig)
 end
 
-# ============================================================
 # 5.  α-family Ψ₂ correlations and full correlation table  (P3)
-# ============================================================
 println("Fig 5: PC and Ψ correlations across modes and α")
 let
     fig = Figure(size = (1100, 400))
@@ -342,9 +330,7 @@ let
     save(joinpath(FIGDIR, "fig05_correlations.png"), fig)
 end
 
-# ============================================================
-# 6.  Time-delay sweep (BONUS — honest negative result)
-# ============================================================
+# 6.  Time-delay sweep (method-stacking robustness check)
 println("Fig 6: time-delay sensitivity (raw vs PC space)")
 let
     fig = Figure(size = (1100, 380))
@@ -359,7 +345,7 @@ let
     axislegend(ax; position = :rb, framevisible = false)
 
     ax2 = Axis(fig[1, 2];
-        title = "Same — but max ρ over Ψ₂'..Ψ₆'",
+        title = "Same, but max ρ over Ψ₂'..Ψ₆'",
         xlabel = "delay k (months)", ylabel = "max_k |ρ(Ψ_k', Niño 3.4)|")
     scatterlines!(ax2, delay_ks, [ρ_delay_max[k] for k in delay_ks];
         color = :crimson, markersize = 10, label = "raw spatial")
@@ -371,9 +357,7 @@ let
     save(joinpath(FIGDIR, "fig06_delay_sweep.png"), fig)
 end
 
-# ============================================================
 # 7.  Negative control histogram
-# ============================================================
 println("Fig 7: permutation null vs. real correlation")
 let
     fig = Figure(size = (1100, 360))
@@ -401,9 +385,7 @@ let
     save(joinpath(FIGDIR, "fig07_null_distribution.png"), fig)
 end
 
-# ============================================================
 # 8.  Bandwidth (ε) sensitivity
-# ============================================================
 println("Fig 8: bandwidth sensitivity")
 let
     # Compute Ψ₂ vs Niño 3.4 correlation across a range of ε scales
@@ -432,16 +414,14 @@ let
     save(joinpath(FIGDIR, "fig08_bandwidth.png"), fig)
 end
 
-# ============================================================
 # Save metrics to text file
-# ============================================================
 open(joinpath(FIGDIR, "enso_metrics.txt"), "w") do io
     @printf io "# ENSO project metrics  (ERSSTv5, 1950–2024, tropical Pacific)\n\n"
-    @printf io "## P1, P2 — PCA / EOF\n"
+    @printf io "## P1, P2, PCA / EOF\n"
     @printf io "ρ(PC1, Niño 3.4) = %.3f\n" ρ_PC[1]
     @printf io "Top-5 explained variance: %s\n" round.(explained[1:5]; digits=3)
     @printf io "\n"
-    @printf io "## P3, P4, P5 — Plain DMAP α=1\n"
+    @printf io "## P3, P4, P5, Plain DMAP α=1\n"
     @printf io "ρ(Ψ₂, Niño 3.4) = %.3f\n" ρ_Ψ[1]
     @printf io "ρ(Ψ_k, Niño 3.4) for k=1..5: %s\n" round.(ρ_Ψ; digits=3)
     @printf io "\n"
@@ -450,7 +430,7 @@ open(joinpath(FIGDIR, "enso_metrics.txt"), "w") do io
         @printf io "α=%.1f:  ρ(Ψ₂)=%.3f\n" α ρ_alpha[α][1]
     end
     @printf io "\n"
-    @printf io "## P6, P7 — time-delay embedding (HONEST NEGATIVE RESULT)\n"
+    @printf io "## P6, P7, time-delay embedding (NEGATIVE RESULT)\n"
     for k in delay_ks
         @printf io "k=%2d:  ρ(Ψ₂') raw=%.3f  PC=%.3f  max_raw=%.3f  max_PC=%.3f\n" k ρ_delay[k] ρ_delay_pc[k] ρ_delay_max[k] ρ_delay_pc_max[k]
     end
@@ -464,9 +444,7 @@ open(joinpath(FIGDIR, "enso_metrics.txt"), "w") do io
     @printf io "Real correlations are %.0fσ (PCA) and %.0fσ (DMAP) above the null distribution\n" ((ρ_PC[1] - mean(chance_PC)) / std(chance_PC)) ((ρ_Ψ[1] - mean(chance_DM)) / std(chance_DM))
 end
 
-# ============================================================
 # 9.  Wavelet spectrogram of PC 1 (Lecture 15 + 27 connection)
-# ============================================================
 println("\nFig 9: PC 1 wavelet spectrogram")
 include("spectrogram.jl")
 let
@@ -508,9 +486,7 @@ let
     save(joinpath(FIGDIR, "fig09_pc1_spectrogram.png"), fig)
 end
 
-# ============================================================
-# 10.  Linear Inverse Model (LIM) — third method (linear, dynamical)
-# ============================================================
+# 10.  Linear Inverse Model (LIM), third method (linear, dynamical)
 println("\nFig 10: LIM eigenvalue spectrum + ENSO mode time series")
 include("lim.jl")
 
@@ -545,8 +521,8 @@ let
     # Left: LIM eigenvalues in the complex plane
     ax1 = Axis(fig[1, 1];
         title  = "LIM eigenvalues σₖ in complex plane",
-        xlabel = "Re σ  (1/month)  — damping rate",
-        ylabel = "Im σ  (1/month)  — angular frequency",
+        xlabel = "Re σ  (1/month) , damping rate",
+        ylabel = "Im σ  (1/month) , angular frequency",
         aspect = 1.0)
     re_σ = real.(lim.σ)
     im_σ = imag.(lim.σ)
@@ -581,7 +557,7 @@ let
     # Bottom: a 2-D phase portrait of the LIM mode itself,
     # showing the (a, b) trajectory in the eigenvector plane.
     ax3 = Axis(fig[2, 1:2];
-        title  = "LIM mode 2-D phase portrait (in-phase vs quadrature) — climate state circulating in mode space",
+        title  = "LIM mode 2-D phase portrait (in-phase vs quadrature), climate state circulating in mode space",
         xlabel = "Re(z)  ←  ENSO amplitude", ylabel = "Im(z)  ←  quadrature")
     sct = scatter!(ax3, z_real, z_imag; color = nino34, colormap = :RdBu_11,
                    colorrange = (-2.5, 2.5), markersize = 4, alpha = 0.7)

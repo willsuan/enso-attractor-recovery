@@ -19,12 +19,8 @@ include("delay_embed.jl")
 const FIGDIR = joinpath(@__DIR__, "..", "figures")
 mkpath(FIGDIR)
 
-# ============================================================
 # 1.  Load + preprocess
-# ============================================================
-println("=" ^ 70)
-println("ENSO project — ERSSTv5 analysis")
-println("=" ^ 70)
+println("ENSO project, ERSSTv5 analysis")
 
 println("\nLoading ERSSTv5...")
 sst, lat_all, lon_all, time_all = load_ersst()
@@ -62,12 +58,8 @@ end
 valid_n = .!isnan.(nino34)
 @printf "Niño 3.4 alignment: %d/%d months valid\n" count(valid_n) length(nino34)
 
-# ============================================================
 # 2.  PCA / EOF analysis  (P1, P2)
-# ============================================================
-println("\n" * "=" ^ 70)
-println("Method 1 — PCA / EOF analysis")
-println("=" ^ 70)
+println("Method 1, PCA / EOF analysis")
 
 pca = fit_pca(X; rank=20)
 PC = Float64.(pca.scores)
@@ -88,8 +80,6 @@ end
 
 ρ_PC = zeros(5)
 for k in 1:5
-    PC[:, k] .= PC[:, k]   # already a copy
-    EOF[:, k] .= EOF[:, k]
     c = cor(PC[valid_n, k], nino34[valid_n])
     if c < 0
         PC[:, k] .= -PC[:, k]
@@ -102,15 +92,11 @@ end
 
 # Test of P1: EOF1 spatial pattern look like ENSO?
 # Test of P2: cor(PC1, Niño 3.4) > 0.9?
-@printf "\nP1 — EOF1 pattern shape: see figure\n"
-@printf "P2 — cor(PC1, Niño 3.4) = %.3f   target ≥ 0.90  →  %s\n" ρ_PC[1] (ρ_PC[1] >= 0.90 ? "PASS" : "FAIL")
+@printf "\nP1, EOF1 pattern shape: see figure\n"
+@printf "P2, cor(PC1, Niño 3.4) = %.3f   target ≥ 0.90  →  %s\n" ρ_PC[1] (ρ_PC[1] >= 0.90 ? "PASS" : "FAIL")
 
-# ============================================================
 # 3.  Plain Diffusion Map  (P3, P4, P5)
-# ============================================================
-println("\n" * "=" ^ 70)
-println("Method 2 — Plain Diffusion Maps on monthly snapshots")
-println("=" ^ 70)
+println("Method 2, Plain Diffusion Maps on monthly snapshots")
 
 # α=1 (Laplace–Beltrami)
 println("Fitting DMAP α=1 ...")
@@ -130,17 +116,15 @@ for k in 1:5
 end
 @printf "Ψ vs Niño 3.4 correlations: %s\n" round.(ρ_Ψ; digits=3)
 
-@printf "\nP3 — cor(Ψ₂, Niño 3.4) = %.3f   target ≥ 0.60  →  %s\n" ρ_Ψ[1] (ρ_Ψ[1] >= 0.60 ? "PASS" : "FAIL")
+@printf "\nP3, cor(Ψ₂, Niño 3.4) = %.3f   target ≥ 0.60  →  %s\n" ρ_Ψ[1] (ρ_Ψ[1] >= 0.60 ? "PASS" : "FAIL")
 
 # Spectral gap analysis (P4)
 λabs = Float64.(abs.(dm.λ))
 gaps = abs.(diff(λabs[1:min(end,10)]))
 gap_after = argmax(gaps)
-@printf "P4 — largest eigenvalue gap is between λ_%d and λ_%d (gap=%.3g)\n" gap_after gap_after+1 maximum(gaps)
+@printf "P4, largest eigenvalue gap is between λ_%d and λ_%d (gap=%.3g)\n" gap_after gap_after+1 maximum(gaps)
 
-# ============================================================
 # 4.  α-family comparison  (E2)
-# ============================================================
 println("\n--- α-family comparison ---")
 dm_alpha = Dict{Float64, DiffusionMap}()
 ρ_alpha  = Dict{Float64, Vector{Float64}}()
@@ -162,12 +146,8 @@ for α in (0.0, 0.5, 1.0)
     @printf "ρ(Ψ₂, Niño 3.4) = %.3f\n" ρs[1]
 end
 
-# ============================================================
 # 5.  Time-delay DMAP  (BONUS: P6, P7)
-# ============================================================
-println("\n" * "=" ^ 70)
-println("Method 3 — DMAP on time-delay embeddings (Takens, BONUS)")
-println("=" ^ 70)
+println("Method 3, DMAP on time-delay embeddings (Takens, BONUS)")
 
 # Sweep over delay k
 delay_ks = [0, 3, 6, 12, 18, 24]
@@ -193,18 +173,14 @@ for k_delay in delay_ks
 end
 
 improvement = ρ_delay[12] - ρ_delay[0]
-@printf "\nP6 — improvement Δρ at k=12 over k=0:  %+.3f   target ≥ +0.05  →  %s\n" improvement (improvement >= 0.05 ? "PASS" : "FAIL")
+@printf "\nP6, improvement Δρ at k=12 over k=0:  %+.3f   target ≥ +0.05  →  %s\n" improvement (improvement >= 0.05 ? "PASS" : "FAIL")
 
 ρ_seq = [ρ_delay[k] for k in delay_ks]
 mono_ish = all(ρ_seq[i+1] >= ρ_seq[i] - 0.02 for i in 1:length(ρ_seq)-1)
-@printf "P7 — non-decreasing ρ across k sweep?  %s\n" (mono_ish ? "PASS" : "FAIL")
+@printf "P7, non-decreasing ρ across k sweep?  %s\n" (mono_ish ? "PASS" : "FAIL")
 
-# ============================================================
 # 6.  Negative control via permuted Niño 3.4
-# ============================================================
-println("\n" * "=" ^ 70)
 println("Negative control: correlate PC1 / Ψ₂ against a randomly permuted Niño 3.4")
-println("=" ^ 70)
 
 # The cleanest null distribution: keep the data and methods unchanged,
 # correlate the recovered indices against a *shuffled* Niño 3.4.  This
@@ -230,7 +206,7 @@ chance_DM_q95 = quantile(chance_DM, 0.95)
 @printf "  PC1: %.3f   (%.0fσ above chance)\n" ρ_PC[1] ((ρ_PC[1] - mean(chance_PC)) / std(chance_PC))
 @printf "  Ψ₂ : %.3f   (%.0fσ above chance)\n" ρ_Ψ[1]  ((ρ_Ψ[1]  - mean(chance_DM)) / std(chance_DM))
 
-# Also keep the spatial-shuffle "amplitude-only" baseline — it tells a
+# Also keep the spatial-shuffle "amplitude-only" baseline, it tells a
 # different but still informative story.
 println("\nAuxiliary baseline: random spatial permutation of each month")
 X_shuf = similar(X)
@@ -248,19 +224,17 @@ dm_s = fit_diffusion_map(X_shuf; α=1.0, d=5, t=1)
 @printf "  Spatial-shuffle Ψ₂ : %.3f   (vs. real %.3f).\n" ρ_shuf_dm ρ_Ψ[1]
 ctrl_pass = ρ_PC[1] > chance_PC_q95 && ρ_Ψ[1] > chance_DM_q95
 
-# ============================================================
 # 7.  Save summary metrics
-# ============================================================
 open(joinpath(FIGDIR, "enso_metrics.txt"), "w") do io
     println(io, "# ENSO project metrics")
     println(io, "# Time window: $(Date(time_w[1])) to $(Date(time_w[end])) ($(length(time_w)) months)")
     println(io, "# Tropical Pacific: 30°S–30°N, 120°E–80°W ($(size(X,2)) sea cells)")
     println(io)
-    println(io, "## P1, P2 — PCA / EOF")
+    println(io, "## P1, P2, PCA / EOF")
     @printf io "  ρ(PC1, Niño 3.4) = %.3f\n" ρ_PC[1]
     println(io, "  Top-5 explained variance: $(round.(explained[1:5]; digits=3))")
     println(io)
-    println(io, "## P3, P4, P5 — Plain DMAP α=1")
+    println(io, "## P3, P4, P5, Plain DMAP α=1")
     @printf io "  ρ(Ψ₂, Niño 3.4) = %.3f\n" ρ_Ψ[1]
     println(io, "  Top-10 |λ|: $(round.(λabs[1:min(end,10)]; digits=4))")
     @printf io "  largest gap after k=%d  (Δ=%.3g)\n" gap_after maximum(gaps)
@@ -270,22 +244,20 @@ open(joinpath(FIGDIR, "enso_metrics.txt"), "w") do io
         @printf io "  α=%.1f:  ρ(Ψ₂, Niño 3.4) = %.3f\n" α ρ_alpha[α][1]
     end
     println(io)
-    println(io, "## P6, P7 — Time-delay DMAP")
+    println(io, "## P6, P7, Time-delay DMAP")
     for k in delay_ks
         @printf io "  k=%2d:  ρ(Ψ₂', Niño 3.4) = %.3f\n" k ρ_delay[k]
     end
     @printf io "  improvement k=0 → k=12:  %+.3f\n" improvement
     println(io)
-    println(io, "## E5 — Spatial-shuffle negative control")
+    println(io, "## E5, Spatial-shuffle negative control")
     @printf io "  ρ(PC1_shuf, Niño 3.4) = %.3f  (orig %.3f)\n" ρ_shuf_pc ρ_PC[1]
     @printf io "  ρ(Ψ₂_shuf, Niño 3.4)  = %.3f  (orig %.3f)\n" ρ_shuf_dm ρ_Ψ[1]
 end
 
 # Persist all results to a JLD2-style file isn't strictly needed; we
 # will run figure generation in the same script.  Print a summary:
-println("\n" * "=" ^ 70)
 println("SUMMARY  (predictions)")
-println("=" ^ 70)
 @printf "P1  EOF1 spatial pattern: see figure\n"
 @printf "P2  ρ(PC1, Niño 3.4) = %.3f   target ≥ 0.90   %s\n" ρ_PC[1] (ρ_PC[1] >= 0.90 ? "PASS" : "FAIL")
 @printf "P3  ρ(Ψ₂, Niño 3.4)  = %.3f   target ≥ 0.60   %s\n" ρ_Ψ[1] (ρ_Ψ[1] >= 0.60 ? "PASS" : "FAIL")

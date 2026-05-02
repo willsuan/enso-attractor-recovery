@@ -679,54 +679,152 @@ data is too sparse to estimate the kernel locally, again it fails.
 And when the noise level is comparable to the manifold curvature,
 you recover the noise, not the manifold.
 
-## E. Class content connections
+## E. Class content connections (questions a peer might ask about previously-covered topics)
 
-### "Where exactly does this connect to Lecture 17, Covariance?"
+### "In Lecture 17 we computed the empirical covariance and eigendecomposed it. You did SVD on the data matrix. Are those the same thing?"
 
-PCA is the spectral decomposition of the empirical covariance
-operator. The columns of V are the eigenvectors of X-transpose-X
-over N minus one; the singular values squared are the eigenvalues.
-So when I do SVD on the centered data matrix, I'm computing the
-same thing as the eigendecomposition of the covariance, more
-numerically stable because we don't form the covariance explicitly.
+Yes, they're the same up to a normalization. If X is the centered
+T-by-N data matrix, the empirical covariance is C equals X-transpose
+times X over N minus 1. Eigenvectors of C are columns of V, where
+X equals U Sigma V-transpose, and eigenvalues of C are sigma-squared
+over N minus 1. So SVD of X gives the same EOFs and same eigenvalues
+the Lecture 17 procedure would; it's just numerically more stable
+because we don't square the condition number by forming X-transpose
+X explicitly.
 
-### "What about Lecture 18, Patterns?"
+### "Lecture 18's example was EOF analysis, exactly your PCA. So what's new in your project?"
 
-Lecture 18 is about extracting coherent spatial-temporal patterns
-from data. EOF analysis is the canonical method for this, and the
-leading EOF is exactly the kind of pattern Lecture 18 motivates.
-Truncating to the first k EOFs is a pattern filter.
+Two things. The first method, PCA, is essentially the Lecture 18
+result restricted to tropical-Pacific SST, included as the canonical
+baseline and to confirm the textbook ENSO horseshoe. The new content
+is the comparison: an out-of-course nonlinear method, anisotropic
+diffusion maps, that recovers the *curved geometry* of the attractor
+that PCA's linear projection cannot see; and a Linear Inverse Model
+that recovers ENSO's *dynamics* that neither static method can give.
+The PCA result is the foothold; the contribution is what the other
+methods reveal beyond it.
 
-### "Lecture 11, Estimation?"
+### "The wavelet transform via FFT — that's the convolution theorem from Lectures 5 and 7?"
 
-The Linear Inverse Model fits a linear propagator L to the data via
-the maximum-likelihood estimator under stationary Gaussian noise.
-That's a textbook estimation problem: minimize the negative log
-likelihood, which, for Gaussian residuals, reduces to a
-least-squares fit of the propagator matrix.
+Exactly. The Morlet CWT at scale s is a convolution of PC 1 against
+a dilated complex wavelet. Direct convolution is order T times S
+(signal length times number of scales); via FFT it's T log T per
+scale. The convolution theorem from Lectures 5 and 7 is what makes
+the spectrogram tractable. The implementation in `src/spectrogram.jl`
+is FFT-multiply-inverse-FFT.
 
-### "Lectures 15 and 27, Wavelet and Time-Frequency?"
+### "Lecture 9 was on bandpass filtering. Why a wavelet instead of just bandpassing PC 1 in the 3-7 year band?"
 
-The wavelet spectrogram of PC 1 is direct application of the Morlet
-basis from Lecture 15, computed via FFT-based convolution. The
-time-frequency representation is the standard tool from Lecture 27.
+A bandpass filter would tell us *how much* power is in the ENSO band
+on average. The wavelet tells us how that power is *distributed in
+time*: when ENSO was active, when it was quiet, whether the 1997-98
+super-El-Niño shows up as a localized burst in the spectrogram. For
+detecting non-stationarity in ENSO amplitude, which is exactly what
+the multidecadal modulation in Figure 9 shows, the time-frequency
+representation from Lecture 27 is the right tool, not a stationary
+bandpass.
 
-### "Did you use anything from earlier in the course, like Convolution or Fourier?"
+### "The Gaussian kernel in DMAP — same Gaussian as the smoothing kernel from Lecture 8?"
 
-The wavelet transform is implemented via the convolution theorem,
-multiplication in Fourier space then inverse FFT. So Lectures 5, 7,
-and 9 (Convolution, Fourier, Bandpass) are implicit infrastructure.
-The Gaussian kernel in diffusion maps is a smoothing operator in
-the sense of Lecture 8, but applied on the data graph rather than
-on a regular grid.
+Same functional form, different role. Lecture 8 used Gaussians for
+smoothing on a regular grid: convolve a signal with a fixed-width
+Gaussian to attenuate high-frequency noise. In DMAP I use the
+Gaussian as a *similarity kernel* between data points, exp of
+minus-distance-squared over epsilon. The bandwidth epsilon is the
+same conceptual knob, but here it sets the scale at which the random
+walk treats two months as neighbors in the data graph, not the
+spatial scale at which a smoothing filter rolls off.
 
-### "Are there topics from class you didn't use?"
+### "Lecture 11 was Estimation. Walk me through LIM as the maximum-likelihood estimator."
 
-Sure. CG (Lecture 12), Triangulation (14), Shaping (16), Streaming
-(20), Similarity (21), Sparsity (22), Distance (24), Adaptive
-Regularization (28). Most of those are either inverse-problem
-methods or geometric methods that don't apply directly to a static
-dimensionality-reduction analysis on a regular grid.
+Assume the state evolves as dx/dt equals L x plus Q xi with xi
+vector white noise. Conditioned on x at time t, the state at t plus
+tau is Gaussian with mean exp of L tau times x-of-t and a covariance
+that doesn't depend on x. The negative log likelihood is quadratic
+in L, so maximizing the likelihood reduces to least squares for the
+propagator G of tau equals C of tau times C of zero inverse, then
+L equals log G of tau over tau via the matrix logarithm. That's
+the textbook ML estimation procedure from Lecture 11 applied to a
+linear stochastic ODE.
+
+### "Lecture 21 covered different similarity measures. Why Pearson correlation against Niño 3.4 specifically?"
+
+For external validation, Pearson correlation against Niño 3.4 is the
+literature-standard ENSO metric, so I used it for direct
+comparability with published results. Internally, the DMAP kernel is
+a *different* similarity, the Gaussian on Euclidean distance, which
+is the local nonlinear version of Pearson similarity. The two
+similarities serve different purposes: kernel for the embedding,
+linear correlation for the comparability check.
+
+### "Lecture 22 was Sparsity. Why not use sparse PCA for the EOFs?"
+
+Sparse PCA would force most loadings of each EOF to be zero, which
+gives spatial patterns that look like *localized* features instead
+of the smooth basin-scale horseshoe. For ENSO that would probably
+collapse EOF 1 onto the equatorial warm tongue and remove the
+subtropical horseshoe lobes. I didn't use it because the unmodified
+EOF horseshoe *is* the canonical ENSO reference pattern, and the
+project's hypothesis was about recovering exactly that. Sparse PCA
+would be the right tool if I were trying to *discover* compact
+regional predictors instead of validating the textbook mode.
+
+### "Lecture 24 was about distance metrics. Why Euclidean distance for the DMAP kernel?"
+
+The Euclidean distance on the area-weighted SST anomaly vector
+corresponds to the L-2 norm on the SST field on the sphere, which
+is the natural physical metric for "how different are these two
+months". Other choices, cosine distance for example, would lose the
+amplitude information that distinguishes a strong El Niño from a
+weak one. The square-root cosine of latitude weighting on each
+column is what makes Euclidean on the data matrix equivalent to
+area-weighted L-2 on the sphere, see Bretherton, Smith, and Wallace,
+1992.
+
+### "Lecture 28 was Adaptive Regularization. Could the DMAP bandwidth be made adaptive?"
+
+Yes, and there's a literature on it. Self-tuning diffusion maps
+(Zelnik-Manor and Perona, 2004) uses a per-point epsilon equal to
+the distance to the k-th nearest neighbor of each point, which adapts
+to local density variations. I used a global epsilon equal to the
+median squared pairwise distance, but the bandwidth-sensitivity
+figure (Figure 8) shows the leading-mode correlation plateaus across
+a factor of about thirty in epsilon, so the result isn't bandwidth-
+limited and adaptive bandwidth wouldn't change the answer. Adaptive
+bandwidth would matter on data with more extreme density variation
+than monthly ENSO has.
+
+### "Lecture 12 was Conjugate Gradient. Anywhere CG could have applied?"
+
+Not in this project. My pipeline is purely spectral: SVD for PCA,
+symmetric eigendecomposition for DMAP, matrix logarithm for LIM,
+no iterative linear solve. CG would matter if I were solving an
+inverse problem, for instance reconstructing a dense SST field from
+sparse satellite or buoy observations, or doing 4D-VAR data
+assimilation. None of that is in scope here.
+
+### "Lecture 20 was Streaming. Could LIM be made streaming for online ENSO forecasting?"
+
+In principle, yes. The LIM propagator G of tau can be updated
+recursively as new monthly data arrives, by a Kalman-style update on
+the lag-tau covariance. Penland and Sardeshmukh's 1995 paper actually
+did near-real-time LIM forecasts of ENSO using exactly that kind of
+incremental update. I didn't implement it because the project's
+question is whether the static fit recovers the correct period and
+damping rate, not whether we can forecast ENSO online. But the
+extension is straightforward.
+
+### "Are there other topics we covered that you didn't use, and would they have helped?"
+
+Triangulation (Lecture 14), Shaping (16). Triangulation comes up for
+irregularly-sampled data; ERSSTv5 is on a regular 2-degree grid, so
+it's not relevant. Shaping is for inverse problems with structured
+priors; my pipeline is forward spectral analysis, no inverse problem.
+The ones that would actually have *added* something on this dataset
+are Sparsity (22) for interpretable EOFs, and Adaptive Regularization
+(28) for self-tuned bandwidth. Both are reasonable extensions, and
+both would address marginal questions rather than the core
+attractor-recovery hypothesis.
 
 ## F. Critical questions / pushbacks
 

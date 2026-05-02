@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Large/auto-downloaded data (auto-fetched by load_sst.jl on first run)
+data/ersst.v5.sst.mnmean.nc
+
+# Vestigial hyperspectral data (unused, from earlier project pivot)
+data/Salinas*.mat
+data/SalinasA*.mat
+
+# Course material (not redistributable)
+course_files/
+
+# Julia
+*.cov
+*.jl.*.cov
+*.jl.cov
+*.jl.mem
+deps/build.log
+deps/deps.jl
+docs/build/
+docs/site/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+Thumbs.db

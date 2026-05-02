@@ -1,0 +1,8 @@
+## LIM (Linear Inverse Model)
+n_PCs = 10, lag τ = 1 month(s)
+
+ENSO eigenpair:
+  σ = -0.1228 + 0.1679 i  (1/month)
+  period            = 3.12 years
+  e-folding decay   = 0.68 years
+  cor(Re z, Niño 3.4) = 0.613

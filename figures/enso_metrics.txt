@@ -1,0 +1,31 @@
+# ENSO project metrics  (ERSSTv5, 1950–2024, tropical Pacific)
+
+## P1, P2 — PCA / EOF
+ρ(PC1, Niño 3.4) = 0.946
+Top-5 explained variance: [0.401, 0.155, 0.082, 0.043, 0.038]
+
+## P3, P4, P5 — Plain DMAP α=1
+ρ(Ψ₂, Niño 3.4) = 0.923
+ρ(Ψ_k, Niño 3.4) for k=1..5: [0.923, 0.297, 0.196, 0.142, 0.072]
+
+## α-family
+α=0.0:  ρ(Ψ₂)=0.943
+α=0.5:  ρ(Ψ₂)=0.937
+α=1.0:  ρ(Ψ₂)=0.923
+
+## P6, P7 — time-delay embedding (HONEST NEGATIVE RESULT)
+k= 0:  ρ(Ψ₂') raw=0.923  PC=0.909  max_raw=0.923  max_PC=0.909
+k= 3:  ρ(Ψ₂') raw=0.868  PC=0.854  max_raw=0.868  max_PC=0.854
+k= 6:  ρ(Ψ₂') raw=0.755  PC=0.742  max_raw=0.755  max_PC=0.742
+k= 9:  ρ(Ψ₂') raw=0.613  PC=0.601  max_raw=0.613  max_PC=0.601
+k=12:  ρ(Ψ₂') raw=0.470  PC=0.459  max_raw=0.693  max_PC=0.631
+k=18:  ρ(Ψ₂') raw=0.253  PC=0.242  max_raw=0.692  max_PC=0.700
+k=24:  ρ(Ψ₂') raw=0.136  PC=0.129  max_raw=0.605  max_PC=0.601
+Δρ(k=12 vs k=0) raw  = -0.453   (target ≥ +0.05  → FAIL)
+Δρ(k=12 vs k=0) PC   = -0.450   (target ≥ +0.05  → FAIL)
+
+## Negative control
+Permutation null (n=500):
+  PC: mean=0.0261, 95th=0.0615, max=0.1030
+  DM: mean=0.0265, 95th=0.0659, max=0.1030
+Real correlations are 46σ (PCA) and 43σ (DMAP) above the null distribution

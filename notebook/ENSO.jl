@@ -79,6 +79,22 @@ stacking.
 
 All algorithms are written from scratch; only `LinearAlgebra.svd`,
 `LinearAlgebra.eigen`, and the matrix logarithm are taken as primitives.
+
+#### How to read this notebook
+
+The notebook is the project, prose and code together. Section 1
+introduces the data with three preliminary visualisations so the
+reader knows what we are decomposing. Section 2 lists seven
+falsifiable predictions made *before* running anything. Sections 3
+through 7.5 apply five techniques in turn (PCA, anisotropic diffusion
+maps, a method comparison, the Linear Inverse Model, a permutation
+null, a Takens-style delay extension, and a Morlet wavelet) and check
+each prediction as it goes. Section 8 collects the pass/fail table
+and the synthesis. Section 9 lists the works cited.
+
+Code cells are kept short and annotated; every figure is preceded by
+a sentence stating what the figure is meant to show and followed by
+a sentence stating what we read off it.
 """
 
 # ╔═╡ a51c45f4-1f89-45e8-9967-b5b4c3bc6835
@@ -315,6 +331,19 @@ end
 # ╔═╡ a2fed5c7-0243-4eea-b187-7f24d7feb845
 md"""
 ## 2, Predictions made *before* running anything
+
+In an exploratory analysis it is tempting to look at the data first
+and write predictions that fit. That makes "success" meaningless,
+because the predictions are just descriptions of what already
+happened. Listing predictions and explicit failure thresholds before
+running any of the methods makes each pass-or-fail a real piece of
+evidence. The seven predictions below were committed before any of
+the figures further down were generated.
+
+The first five (P1–P5) test whether the methods recover the canonical
+ENSO picture. The last two (P6, P7) test the additional hypothesis
+that *stacking* methods (Takens delay-embedding then diffusion maps)
+should improve the result.
 
 | # | prediction | falsification |
 |:---:|:---|:---|
@@ -563,6 +592,15 @@ end
 # ╔═╡ 92eb9810-102f-4dbd-b618-604121d19f3b
 md"""
 ## 4, Method 2: Anisotropic Diffusion Maps (out-of-course)
+
+PCA gave us the *linear* answer: ENSO is the leading variance
+direction. But variance is a linear notion. If the climate dynamics
+are nonlinear, PCA captures only the leading axis of the data cloud,
+not the *shape* of the cloud around it. The textbook recharge
+oscillator is a 2-D oscillation, so we expect the climate state to
+trace a closed curve in state space rather than a Gaussian blob, and
+PCA cannot reveal that curvature even when it exists. The next
+method is designed to.
 
 #### Intuition: random walks on the data graph
 
@@ -1221,9 +1259,19 @@ any input from a known ENSO index.
 md"""
 ## 6, Negative control: permutation null
 
-If our recovery is real and not noise, the correlations should be far
-above what you'd get by correlating PC 1 / Ψ₂ against a random
-shuffle of the Niño 3.4 series.
+A correlation of 0.92 against Niño 3.4 *sounds* impressive. But how
+much of that is the methods recovering ENSO, and how much is just
+"the SST field has heavy tails and any decomposition will pick up
+*some* low-frequency variability that aligns with a heavy-tailed
+index"?
+
+The standard test is a **permutation null**: shuffle the Niño 3.4
+time series in time, recompute the correlation, and repeat 500
+times. The shuffle preserves the marginal distribution of Niño 3.4
+(same range, same variance, same higher moments) while destroying the
+month-by-month time alignment with PC 1 / Ψ₂. Any correlation above
+this null distribution is structure that the methods recovered, not
+artefact of broad amplitude alignment.
 """
 
 # ╔═╡ 7e12b7a2-b22a-4cb2-80cd-566b17454b2d

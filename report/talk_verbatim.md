@@ -18,24 +18,26 @@ GEO 384H · William Suan · 10 minutes
 
 ▸ Notebook position: top of the notebook, the title cell visible.
 
-My project tests a climate-physics prediction with three unsupervised
-spectral methods. The data is monthly sea-surface temperature in the
-tropical Pacific, 1950 to 2024. The validation target is NOAA's
-official Niño 3.4 index, but Niño 3.4 is never an input, only a
-yardstick.
+The tropical Pacific climate state is a 2,322-dimensional vector,
+one number per grid cell of sea-surface temperature. But going back
+to Bjerknes in 1969, the climate-physics literature has modeled it
+as a *low-dimensional dynamical system*: a slow attractor with
+basically one or two macroscopic degrees of freedom. The dominant
+mode of that attractor is ENSO, El Niño–Southern Oscillation.
 
-The tropical Pacific climate has been modeled, going back to Bjerknes
-in 1969, as a low-dimensional dynamical system in state space, a
-slow attractor. The dominant mode of that attractor is ENSO, El
-Niño-Southern Oscillation. The question I'm asking is whether three
-methods, attacking the data along three different mathematical axes,
-can recover that attractor unsupervised.
+That is a falsifiable claim about geometry. If the climate state
+genuinely lives on a low-dimensional attractor, three different
+mathematical lenses should all see the same low-dimensional
+structure inside the high-dimensional data. **My project tests
+that.** Monthly SST anomalies, 1950 to 2024, validation against
+NOAA's official Niño 3.4 index, used only as a yardstick, never
+as input.
 
-The three methods are listed at the top of the notebook. PCA, the
+The three lenses, listed at the top of the notebook. PCA, the
 in-course method from **Lecture 17 on Covariance**, recovers the
 spatial mode. Anisotropic diffusion maps, the out-of-course method,
 recovers the curved manifold geometry. The Linear Inverse Model from
-Penland and Sardeshmukh, related to **Lecture 11 on Estimation**,
+Penland and Sardeshmukh, the **Lecture 11 estimation** connection,
 recovers ENSO's dynamical period and damping rate. Plus a Morlet
 wavelet spectrogram from **Lectures 15 and 27** to confirm the
 temporal structure.
@@ -96,18 +98,23 @@ threshold.
 ▸ Scroll to the predictions table, "## 2, Predictions made before
 running anything".
 
-I made seven predictions before running anything.
+I committed seven predictions *before* running anything. The reason:
+in an exploratory analysis it's easy to look at the data first and
+then write predictions that fit, which makes "success" meaningless.
+Locking down predictions and explicit failure thresholds in advance
+turns each pass-or-fail into a real piece of evidence.
 
-Five core predictions: EOF-1 should look like the ENSO horseshoe.
-PC-1 should correlate with Niño 3.4 above zero point nine. The
-diffusion-map coordinate Psi-two should correlate above zero point
-six. The DMAP eigenvalue spectrum should have a clear gap. Major
-historical El Niños should appear as far outliers in the phase
-portrait.
+Five core predictions. **P1**: EOF-1 should look like the ENSO
+horseshoe. **P2**: PC-1 should correlate with Niño 3.4 above zero
+point nine. **P3**: the diffusion-map coordinate Psi-two should
+correlate above zero point six. **P4**: the DMAP eigenvalue spectrum
+should have a clear gap. **P5**: major historical El Niños should
+appear as far outliers in the phase portrait.
 
-Plus two method-stacking predictions: that a Takens-style time-delay
-embedding should *improve* the recovery. All seven predictions are
-falsifiable and have explicit failure thresholds.
+Plus two method-stacking predictions, **P6** and **P7**: a
+Takens-style time-delay embedding should *improve* the DMAP recovery,
+and the improvement should be monotone in the lag. Spoiler: those
+two will fail.
 
 ---
 
@@ -172,34 +179,47 @@ nothing else of comparable amplitude.
 
 ▸ Scroll to "## 4, Method 2: Anisotropic Diffusion Maps (out-of-course)".
 
+So PCA gave us the linear answer: yes, ENSO is the leading variance
+mode. But variance is a *linear* notion. PCA always returns ellipsoidal
+clouds because its only knob is "biggest direction." If the climate
+dynamics are nonlinear, PCA captures the leading axis but not the
+*shape* of the cloud around it. The recharge oscillator is a 2-D
+oscillation, so we expect a closed curve in state space, not a
+Gaussian blob, and we need a method that can see curvature.
+
 The out-of-course method is anisotropic diffusion maps, from Coifman
 and Lafon, 2006.
 
-The intuition I narrate from the notebook: PCA works in the Euclidean
-geometry of the ambient space. Diffusion maps builds a graph of the
-data, where edge weights encode "how easy is it to walk between two
-months in one step of a random walk", and reads geometry off the
-slow modes of the random walk.
+The intuition: PCA measures distance with the Euclidean ruler of the
+ambient space. Diffusion maps replaces that ruler. It builds a graph
+on the data, where edge weights encode "how easy is it to walk
+between two months in one step of a random walk on the data?", and
+reads geometry off the slow modes of that random walk. Two months are
+*close* in the diffusion-map embedding if the random walk visits them
+at similar transition probabilities — a notion of distance that
+respects manifold geometry rather than ambient Euclidean structure.
 
-The construction is: build a Gaussian similarity kernel with bandwidth
-epsilon. Alpha-renormalize the kernel to remove sampling-density
-bias. Row-normalize to get a Markov transition matrix. Take its
-eigendecomposition. The leading nontrivial eigenvectors become the
-new manifold coordinates.
+The construction in three steps. Build a Gaussian similarity kernel
+``k_\varepsilon`` with bandwidth epsilon. Alpha-renormalize to remove
+sampling-density bias. Row-normalize to get a Markov transition matrix
+``P``. The leading nontrivial eigenvectors of ``P`` become the new
+manifold coordinates ``\Psi_2, \Psi_3, \dots``.
 
 ▸ Scroll to the alpha-family table and to the "Why α = 1?"
 subsection.
 
-The alpha-family is the construction's defining feature. As epsilon
-goes to zero, alpha equals zero recovers the graph Laplacian, biased
-by where data sits densely. Alpha equals one-half recovers the
-Fokker-Planck operator. Alpha equals one recovers the pure
-Laplace-Beltrami operator on the data manifold,
-sampling-density-invariant.
+The alpha parameter is the construction's defining feature. As
+epsilon shrinks, alpha equals zero recovers the graph Laplacian,
+which is biased by where the data sits densely. Alpha equals one-half
+recovers the Fokker–Planck operator with a drift in the
+log-probability. Alpha equals one recovers the **pure Laplace–Beltrami
+operator on the data manifold**, sampling-density-invariant.
 
-For climate, where some states are sampled far more often than others,
-most months are neutral, El Niños are rare, alpha equals one is the
-physically motivated choice. We use it as the primary value.
+That last one matters for climate. Most months are neutral, the
+strong El Niños are rare. We don't want the embedding to be biased
+toward the centroid where the data piles up — we want the manifold
+of *possible* states. So **alpha equals one is the physically
+motivated choice**, and we use it as the primary value.
 
 ---
 
@@ -260,23 +280,32 @@ months in similar climate configurations have high affinity."**
 ▸ Scroll to "### Phase portrait, α = 1 ... and the (Ψ₂, Ψ₃)
 horseshoe". Both panels visible.
 
-This is the central figure of the project.
+This is the central figure of the project, and the answer to the
+"can DMAP show curvature" question.
 
-Each point on the left is one month, colored by Niño 3.4. The cloud
-is *not* random, it traces a coherent horseshoe. The strongest
-historical El Niños, December '72, '82, '97, 2015, 2023, sit at
-the warm extreme of the manifold, far from the centroid. Strong La
-Niñas cluster at the opposite extreme.
+**Left panel.** Each point is one month, coloured by Niño 3.4. The
+cloud is not random; it traces a coherent horseshoe. The strongest
+historical El Niños, December '72, '82, '97, 2015, 2023, sit at the
+warm extreme of the manifold, far from the centroid. Strong La Niñas
+cluster at the opposite extreme. **The Niño 3.4 colour gradient
+follows Psi-two**, which is what gives us the 0.92 correlation,
+*and* the cloud is curved in the perpendicular direction, which is
+what PCA cannot see.
 
-Right panel: I picked one four-year ENSO cycle, January 1996 through
-December 1999, and drew the trajectory through the manifold. The
-climate state climbs into the warm phase during 1997. It peaks at
-the December 1997 super-El-Niño in the lower right of the embedding.
-Then it unwinds through the strong 1998-99 La Niña along a
-*different* path on the manifold.
+**Right panel.** I picked one four-year ENSO cycle, January 1996
+through December 1999, and drew the trajectory through the manifold.
+The climate state climbs into the warm phase during 1997. It peaks
+at the December 1997 super-El-Niño in the lower right of the
+embedding. Then it unwinds through the strong 1998–99 La Niña along
+a **different path** on the manifold. The trajectory is not a circle.
 
 This is the **recharge oscillator**, the leading dynamical model of
-ENSO from Jin 1997, drawn in state space. **P5 passes.**
+ENSO from Jin 1997, *drawn in state space*. **P5 passes.** The
+geometric content here is twofold: the curvature is a coordinate-
+independent statement that ENSO is genuinely nonlinear, and the
+fact that El Niño and La Niña arcs are different paths captures the
+well-known ENSO asymmetry that PCA's PC-2 cannot see (Burgers et al.
+2005).
 
 ---
 
@@ -329,14 +358,22 @@ systems.**
 ▸ Scroll to "## 5, Method comparison". The four-panel scatter is
 visible.
 
-Side-by-side: PCA's PC-1 versus PC-2 plane is a featureless cloud,
-all the variance is along one axis, the second is just orthogonal
-noise. The diffusion-map panels show the same nine hundred months as
-a curved manifold. At alpha equals one, the curvature is striking, a
-clean horseshoe, La Niña on the cool end, El Niño on the warm end.
+To make the contrast between the two methods literal, here are the
+same nine hundred months in the four embeddings, side by side, all
+coloured by the same Niño 3.4 scale.
 
-The two methods agree on the leading axis. They disagree dramatically
-on the geometry around it.
+PCA's PC-1 versus PC-2 plane on the left: a featureless cloud. All
+the variance is along PC-1, the second is just orthogonal noise. The
+three diffusion-map panels show the same data as a *curved manifold*,
+and the curvature gets cleaner as alpha goes from zero to one. At
+alpha equals one, the horseshoe is unambiguous, La Niña on the cool
+end, El Niño on the warm end.
+
+**Both methods agree on the leading axis** — the correlations with
+Niño 3.4 in the table below are all in the 0.92 to 0.95 range. **They
+disagree dramatically on the geometry around that axis.** That
+disagreement is the geometric content the in-course method cannot
+reach.
 
 ---
 
@@ -344,64 +381,88 @@ on the geometry around it.
 
 ▸ Scroll to "## 5.5, Method 3: Linear Inverse Model (LIM)".
 
-PCA and diffusion maps are both *static* methods, they ignore time
-ordering. To extend the comparison along the *dynamics* axis I add
-a Linear Inverse Model from Penland and Sardeshmukh, 1995.
+Both PCA and diffusion maps are *static* state-space methods. They
+treat each month as an independent point and ignore time ordering.
+But the climate-physics claim isn't just "ENSO has a spatial pattern
+and a curved manifold." It's also that **ENSO is a damped oscillator
+with a roughly three-year period**. To check that, we need a method
+that *uses* the time ordering. That's the Linear Inverse Model from
+Penland and Sardeshmukh, 1995.
 
-Read the construction off the cell: assume the climate state evolves
-as a stationary stochastic linear ODE, dx/dt equals L times x plus
-noise. Estimate the propagator G of tau equals C of tau times C of
-zero inverse, take the matrix logarithm to get L, then eigendecompose
-L. Each complex eigenpair of L is a damped oscillator with explicit
-period and damping rate.
-
-This is a textbook linear-state-space estimation problem, the
-**Lecture 11 connection**: L is the maximum-likelihood estimator
-under stationary Gaussian noise.
+The construction. Assume the climate state evolves as a stationary
+stochastic linear ODE, ``dx/dt = L\,x + Q\,\xi(t)``. Estimate the
+one-month propagator ``G(\tau) = C(\tau)\,C(0)^{-1}`` directly from
+data, take the matrix logarithm to get ``L``, then eigendecompose
+``L``. Each complex eigenpair of ``L`` is a damped oscillator with an
+**explicit period** ``T = 2\pi/|\omega|`` and **e-folding decay**
+``\tau_d = -1/\alpha``. This is a textbook linear-state-space
+estimation problem, the **Lecture 11 connection**: ``L`` is the
+maximum-likelihood estimator of the linear propagator under
+stationary Gaussian noise.
 
 ▸ Scroll down to the LIM eigenvalue-and-time-series figure.
 
 I fit LIM on the top ten PC scores at lag one month. The least-damped
 complex eigenpair gives **period three point one years and e-folding
 decay zero point six eight years**, about eight months. Both numbers
-are squarely in the published-LIM literature range for ENSO.
+are squarely in the published-LIM literature range for ENSO. **The
+key point: those numbers came out of the data, not out of fitting
+to Niño 3.4.**
 
 The right panel: the LIM mode time series overlaid with Niño 3.4.
-Correlation is zero point six one, lower than PCA's zero point
-nine five. That's expected, Niño 3.4 is a one-dimensional scalar,
-LIM's natural representation is a two-dimensional oscillator;
-projecting onto one axis loses half the information. The point of
-LIM is not the correlation, it's the **explicit period and decay
-rate** that the static methods cannot give.
+Correlation is zero point six one, lower than PCA's zero point nine
+five. That's expected. Niño 3.4 is a one-dimensional scalar; LIM's
+natural representation is a *two-dimensional* oscillator (the complex
+eigenpair has an in-phase and a quadrature component). Projecting
+onto one axis loses half the information. **The point of LIM is not
+the correlation, it's the explicit period and decay rate** that the
+static methods cannot give.
 
 ---
 
-## 8:45 to 9:00, Section 6, Permutation null
+## 8:45 to 9:05, Section 6, Permutation null
 
 ▸ Scroll to "## 6, Negative control: permutation null".
 
-Statistical rigor: I correlated the recovered PC-1 and Psi-two
-against five hundred random shuffles of the Niño 3.4 series. The
-null distributions concentrate around rho equals zero point zero
-three. The real correlations are **forty-six and forty-three
-standard deviations above** the null. The recovery cannot be
-attributed to chance.
+At this point we have three methods all reporting correlations above
+zero point nine. That **sounds** impressive, but the obvious worry
+is: maybe SST data is just spatially correlated enough that *any*
+decomposition will pick up some low-frequency mode that aligns with
+a heavy-tailed climate index. Maybe 0.92 is what you'd get by chance.
+
+The cleanest check: shuffle Niño 3.4 in time and re-correlate. Five
+hundred shuffles each. The shuffle preserves the marginal distribution
+of the index, same range, same variance, same fat tails, while
+destroying its time alignment with PC-1 / Psi-two. **Anything above
+this null distribution is real recovered structure, not artefact.**
+
+The null distributions concentrate around ``\rho = 0.03``. The real
+correlations are **forty-six and forty-three standard deviations
+above** the null. The recovery is not chance.
 
 ---
 
-## 9:00 to 9:30, Section 7, Method-stacking robustness check
+## 9:05 to 9:35, Section 7, Method-stacking robustness check
 
 ▸ Scroll to "## 7, Method-stacking robustness check: time-delay
 diffusion maps".
 
-A robustness check. A common pattern in applied dimensionality
-reduction is to *stack* methods, preprocess with one technique, apply
-another. The particular stack I tested: Takens' embedding theorem
-followed by diffusion maps. Takens' theorem says a smooth flow on a
-d-dimensional attractor can be reconstructed from a single generic
-scalar observable just by stacking time-delayed copies of it.
+So far everything has worked. To stress-test that, I designed P6 and
+P7 *as a prediction I expected to confirm*. The premise: a common
+pattern in applied dimensionality reduction is to **stack methods**,
+preprocess with one technique then apply another. The particular
+stack I tested is Takens' embedding theorem followed by diffusion
+maps.
 
-So plausibly, this stack should improve the recovery.
+**Takens 1981** is a remarkable theorem: a smooth flow on a
+``d``-dimensional attractor can be reconstructed from a single
+generic scalar observable, just by stacking time-delayed copies. So
+plausibly, replacing each monthly snapshot ``x_t`` with the
+delay-vector ``[x_t,\, x_{t-\tau},\, \dots,\, x_{t-k\tau}]`` should
+give DMAP more dynamical context per point and *improve* the
+recovery. This is also the standard rationale for delay embeddings
+in computational neuroscience (Mante–Sussillo, Pandarinath), so I
+had a personal stake in seeing it work.
 
 ▸ Show the delay-sweep figure.
 
@@ -409,39 +470,49 @@ So plausibly, this stack should improve the recovery.
 leading-mode correlation *decreases* monotonically, from zero point
 nine two down to zero point one four. **P6 and P7 both fail.**
 
-I diagnose two contributing factors. One: distance concentration. At
-twelve months of lag, the ambient dimension is over thirty thousand,
-and the ratio of maximum to median pairwise distance collapses from
-six point nine to two, the classical curse of dimensionality, which
-makes the Gaussian kernel degenerate. Two: each added lag introduces
-new low-frequency modes, the annual cycle, lagged correlations, that
-displace ENSO from being the leading nontrivial eigenfunction.
+Two contributing factors. **One: distance concentration.** At twelve
+months of lag, the ambient dimension is over thirty thousand, and
+the ratio of maximum-to-median pairwise distance collapses from 6.9
+to 2.0. That's the classical curse of dimensionality, and it makes
+the Gaussian kernel nearly uniform — the diffusion map has nothing
+left to discriminate on. **Two: eigenfunction reordering.** Each
+added lag introduces new low-frequency modes (the annual cycle,
+lagged seasonal correlations) that displace ENSO from being the
+leading nontrivial eigenfunction. The signal isn't lost, it just
+isn't on Psi-two anymore.
 
-The lesson: naive method-stacking does not always help. Plain DMAP
-suffices for ENSO.
+**The lesson: naive method-stacking is not free**, and plain DMAP
+suffices for ENSO. This is exactly the kind of negative result that
+makes the preregistered predictions worth doing — if I'd written
+P6 *after* running the analysis, I'd never have included it.
 
 ---
 
-## 9:30 to 9:55, Section 7.5, Wavelet spectrogram
+## 9:35 to 9:55, Section 7.5, Wavelet spectrogram
 
 ▸ Scroll to "## 7.5, Time-frequency check on PC 1". Show Figure 9.
 
-A check on the temporal structure. PCA gave the spatial mode, the
-wavelet spectrum should give the temporal mode.
+One last check before the synthesis. PCA gave us the *spatial* mode
+of ENSO — the horseshoe pattern. LIM gave us a global ``T = 3.1``
+year, ``\tau_d = 8`` month oscillator. The piece in between is
+checking that PC-1 *as a time series* actually has the right local
+frequency content, not just the right average period. That's what a
+wavelet spectrogram answers.
 
-I ran a Morlet continuous wavelet transform on PC-1, the canonical
-wavelet treatment of ENSO data, following Torrence and Compo, 1998.
-This is **Lectures 15 and 27 in action**, the wavelet basis from
-Lecture 15 and the time-frequency representation from Lecture 27.
-Implementation from scratch via the FFT.
+I ran a Morlet continuous wavelet transform on PC-1, following
+Torrence and Compo, 1998. This is **Lectures 15 and 27 in action**,
+the wavelet basis from Lecture 15 and the time-frequency
+representation from Lecture 27. Implementation from scratch via the
+FFT.
 
-Power is concentrated in the two-to-seven year band, exactly the
-canonical ENSO range. The strongest excursion is the 1997-98
-super-El-Niño. Quieter epochs in the 1960s and 70s, more active
-period from the 1980s on, a known multidecadal modulation.
+Power is concentrated in the two-to-seven year band, *exactly the
+canonical ENSO range*. The strongest excursion is the 1997-98
+super-El-Niño. There are quieter epochs in the 1960s and 70s and a
+more active period from the 1980s on, a known multidecadal
+modulation.
 
-The recovered ENSO mode has the right temporal as well as the right
-spatial structure.
+The takeaway: the recovered ENSO mode has the right temporal as well
+as the right spatial structure.
 
 ---
 
@@ -449,27 +520,41 @@ spatial structure.
 
 ▸ Scroll to "## 8, Summary". The pass/fail table is visible.
 
-To summarize, four orthogonal pieces of ENSO's structure recovered
-unsupervised. PCA, **Lecture 17**, recovers the canonical horseshoe
-spatial pattern at correlation zero point nine five. Anisotropic
-diffusion maps, the out-of-course method, recovers the same axis at
-zero point nine two and *also* reveals a curved attractor in state
-space that PCA cannot see. The Linear Inverse Model, the
-**Lecture 11** estimation problem, recovers ENSO's dynamical
-signature: period three years, e-folding eight months. The Morlet
-wavelet spectrogram, **Lectures 15 and 27**, confirms the temporal
-structure.
+To pull the four threads together. Going back to the climate-physics
+claim at the start: *the tropical Pacific climate state lives on a
+low-dimensional attractor, and ENSO is its dominant mode.* That
+claim is now verified along **four orthogonal directions**, none of
+which used Niño 3.4 as input.
 
-Together, these four methods reproduce the canonical ENSO
-description from four orthogonal directions, none of which use the
-Niño 3.4 index as input.
+* **PCA**, the **Lecture 17** covariance decomposition, recovers the
+canonical *spatial* horseshoe pattern at correlation 0.946.
+* **Anisotropic diffusion maps**, the out-of-course method, recovers
+the same axis at 0.923 *and* reveals the **curved geometry** of the
+attractor that PCA cannot see, including the El Niño / La Niña
+asymmetry.
+* **The Linear Inverse Model**, the **Lecture 11** estimation
+problem, recovers the **dynamical signature**: a damped oscillator
+with period 3.1 years and e-folding decay 8 months.
+* **The Morlet wavelet spectrogram**, **Lectures 15 and 27**,
+confirms the **temporal structure**: power concentrated in the 2–7
+year ENSO band.
 
-The deeper takeaway: the same operator-theoretic toolkit recovers
-low-dimensional structure in high-dimensional climate data and
-high-dimensional neural data. The mathematical content of
-"recovering an attractor" is shared between climate dynamics and
-the computational neuroscience I'm interested in. The math doesn't
-care which substrate generated the data.
+Five of seven predictions pass. Two fail honestly: Takens-style
+delay embedding does *not* improve the DMAP recovery, and the
+preregistered prediction lets us report that as a real result instead
+of quietly dropping it.
+
+The deeper takeaway, the reason this is in the same course as
+neural-manifolds work: **the same operator-theoretic toolkit
+recovers low-dimensional structure in high-dimensional climate data
+and in high-dimensional neural recordings**. PCA, diffusion maps,
+LIM, the wavelet — these are not climate-specific tricks. They're
+spectral decompositions of operators (covariance, transition matrix,
+propagator, time-frequency representation) that any sufficiently
+structured sampled dynamical system admits. The mathematical content
+of "recovering an attractor" is shared between climate dynamics and
+the computational neuroscience I'm interested in. **The substrate
+doesn't change the math.**
 
 ▸ Scroll to "## 9, Works cited" at the bottom of the notebook to
 acknowledge the references on screen for ~5 seconds: Coifman and
@@ -477,8 +562,8 @@ Lafon for diffusion maps, Penland and Sardeshmukh for LIM, Torrence
 and Compo for the wavelet treatment, Jin's recharge oscillator,
 Takens for the embedding theorem, plus Lorenz's 1956 EOF analysis,
 Mante-Sussillo and Pandarinath for the neural-manifolds analogy.
-Don't read each name aloud, just point and say "the full reference
-list is here".
+Don't read each name aloud; point and say "the full reference list
+is here".
 
 Thank you. I'm happy to take questions.
 

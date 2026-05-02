@@ -902,12 +902,15 @@ between November and January, the manifold makes it visible.
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000001
 md"""
-### Beyond static figures: 3-D attractor and animated trajectory
+### 3-D attractor and the 1997-98 peak
 
 The 2-D phase portrait shows ``(\Psi_2, \Psi_3)``. Adding the third
-coordinate gives a fuller picture of the attractor; animating the
-trajectory makes the recharge-oscillator dynamics visible as a literal
-motion.
+coordinate gives a fuller picture of the attractor; the two figures
+that follow show the climate state at the Jan 1998 peak of the 1997-98
+super-El-Niño, both in the manifold coordinates and in the raw spatial
+domain. Animated versions of the next two figures live alongside the
+notebook in `figures/fig12_trajectory_anim.mp4` and
+`figures/fig13_sst_anim.mp4` for live viewing.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000002
@@ -923,39 +926,29 @@ an axis the 2-D projection collapses.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000004
-HTML("""
-<video controls width="100%" poster="$(joinpath("..", "figures", "fig12_trajectory_poster.png"))">
-  <source src="$(joinpath("..", "figures", "fig12_trajectory_anim.mp4"))" type="video/mp4">
-  <img src="$(joinpath("..", "figures", "fig12_trajectory_poster.png"))" alt="Trajectory animation, peak Jan 1998" style="width:100%">
-</video>
-""")
+PlutoUI.LocalResource(joinpath(@__DIR__, "..", "figures", "fig12_trajectory_poster.png"))
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000005
 md"""
-*Animation: phase-portrait trajectory 1990-2010.* The climate state
-traced through ``(\Psi_2, \Psi_3)`` frame by frame, with the
-synchronised Niño 3.4 series on the right. Two full ENSO cycles plus
-the 1997-98 super-El-Niño. Watch the state climb the warm-tongue arc
-into 1997, peak deep in the warm corner, then unwind through the
-1998 La Niña along a *different* path on the manifold. **This is the
-recharge oscillator drawn in motion.**
+*Figure 12.* Phase-portrait trajectory at the Jan 1998 super-El-Niño
+peak. **Left:** the full ``(\Psi_2, \Psi_3)`` cloud with the current
+month highlighted as a dark circle in the warm corner. **Right:**
+the synchronised Niño 3.4 series 1990-2010, with the same Jan 1998
+month flagged in red. The full animation walks through 240 months;
+this still captures the deepest excursion into the warm corner.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000006
-HTML("""
-<video controls width="100%" poster="$(joinpath("..", "figures", "fig13_sst_poster.png"))">
-  <source src="$(joinpath("..", "figures", "fig13_sst_anim.mp4"))" type="video/mp4">
-  <img src="$(joinpath("..", "figures", "fig13_sst_poster.png"))" alt="SST anomaly animation, peak Jan 1998" style="width:100%">
-</video>
-""")
+PlutoUI.LocalResource(joinpath(@__DIR__, "..", "figures", "fig13_sst_poster.png"))
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000007
 md"""
-*Animation: SST anomaly map 1996-2000.* The same climate state shown
-in the raw spatial domain. Watch the warm tongue build along the
-equator through 1997, peak in late 1997, then collapse into the 1998
-La Niña cooling. The Niño 3.4 box (dashed) is the regional average
-that the official index measures.
+*Figure 13.* SST anomaly field at Jan 1998, the climate state behind
+the highlighted point in Figure 12. The warm tongue stretches across
+the entire central-to-eastern equatorial Pacific, with the strongest
+anomalies (deep blue) in the eastern basin. The Niño 3.4 box (dashed)
+is the regional average that the official index measures, here
+sitting at +2.4 °C, the largest excursion in the 75-year record.
 """
 
 # ╔═╡ a33add4b-3acc-48c1-bc0d-97c814e3b39f

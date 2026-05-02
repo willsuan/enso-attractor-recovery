@@ -691,7 +691,12 @@ an axis the 2-D projection collapses.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000004
-HTML("""<video controls width="100%" src="$(joinpath("..", "figures", "fig12_trajectory_anim.mp4"))"></video>""")
+HTML("""
+<video controls width="100%" poster="$(joinpath("..", "figures", "fig12_trajectory_poster.png"))">
+  <source src="$(joinpath("..", "figures", "fig12_trajectory_anim.mp4"))" type="video/mp4">
+  <img src="$(joinpath("..", "figures", "fig12_trajectory_poster.png"))" alt="Trajectory animation, peak Jan 1998" style="width:100%">
+</video>
+""")
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000005
 md"""
@@ -705,7 +710,12 @@ recharge oscillator drawn in motion.**
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000006
-HTML("""<video controls width="100%" src="$(joinpath("..", "figures", "fig13_sst_anim.mp4"))"></video>""")
+HTML("""
+<video controls width="100%" poster="$(joinpath("..", "figures", "fig13_sst_poster.png"))">
+  <source src="$(joinpath("..", "figures", "fig13_sst_anim.mp4"))" type="video/mp4">
+  <img src="$(joinpath("..", "figures", "fig13_sst_poster.png"))" alt="SST anomaly animation, peak Jan 1998" style="width:100%">
+</video>
+""")
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000007
 md"""
@@ -772,7 +782,7 @@ on what the geometry *around* that axis looks like.**
 Numerical correlations:
 
 | method | ρ(leading mode, Niño 3.4) |
-|:-|:-:|
+|:---|:---:|
 | PCA (PC 1) | $(round(ρ_PC[1]; digits=3)) |
 | DMAP α=0 (Ψ₂) | $(round(dm_alpha[0.0].ρ[1]; digits=3)) |
 | DMAP α=½ (Ψ₂) | $(round(dm_alpha[0.5].ρ[1]; digits=3)) |

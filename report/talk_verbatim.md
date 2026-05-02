@@ -448,9 +448,9 @@ be reconstructed from a single generic scalar observable, just by
 stacking time-delayed copies. So plausibly, replacing each monthly
 snapshot ``x_t`` with the delay-vector ``[x_t,\, x_{t-\tau},\, \dots,
 \, x_{t-k\tau}]`` should give DMAP more dynamical context per point
-and *improve* the recovery. This is also the standard rationale for
-delay embeddings in computational neuroscience (Mante–Sussillo,
-Pandarinath), so I had a personal stake in seeing it work.
+and *improve* the recovery. This is the standard rationale for
+phase-space reconstruction throughout chaos theory and time-series
+analysis, and I expected the same logic to carry over here.
 
 ▸ Show the delay-sweep figure.
 
@@ -517,22 +517,20 @@ input, all confirm it: the **spatial** horseshoe via PCA
 Morlet wavelet (**Lectures 15 and 27**). Five of seven predictions
 pass; P6 and P7 fail, in the diagnostic way we just walked through.
 
-The reason this project sits in the same course as neural-manifolds
-work: PCA, diffusion maps, LIM, the wavelet are not climate-specific
-tricks. Each one is a spectral decomposition of an operator: the
-covariance, the transition matrix, the propagator, the time-frequency
-representation. Any sufficiently structured sampled dynamical system
-admits all four. The same toolkit that recovers an attractor in
-seventy-five years of SST data recovers an attractor in a few hours
-of neural recordings. The math doesn't care which substrate
-generated the data, and that's the part I find genuinely exciting.
+The methodological point. PCA, diffusion maps, LIM, the wavelet are
+not four unrelated techniques. Each one is a spectral decomposition
+of a different operator: the covariance, the transition matrix, the
+propagator, the time-frequency representation. Any sufficiently
+structured sampled dynamical system admits all four, and they answer
+genuinely different questions about the same data: what shape, what
+geometry, what dynamics, what frequency content. That's why these
+four belong together as a single bundle.
 
 ▸ Scroll to "## 9, Works cited" at the bottom of the notebook to
 acknowledge the references on screen for ~5 seconds: Coifman and
 Lafon for diffusion maps, Penland and Sardeshmukh for LIM, Torrence
 and Compo for the wavelet treatment, Jin's recharge oscillator,
-Takens for the embedding theorem, plus Lorenz's 1956 EOF analysis,
-Mante-Sussillo and Pandarinath for the neural-manifolds analogy.
+Takens for the embedding theorem, plus Lorenz's 1956 EOF analysis.
 Don't read each name aloud; point and say "the full reference list
 is here".
 
@@ -625,14 +623,14 @@ edge artefact.
 
 ### "How did you choose this project topic?"
 
-I'm interested in dimensionality reduction and what's called neural
-manifolds, low-dimensional structure inside high-dimensional neural
-recordings. ENSO struck me as the climate analogue of that: a
-low-dimensional dynamical system embedded in a very high-dimensional
-state space, the SST anomaly field. The mathematical structure is
-the same, the substrate is different. So the project is partly a
-sandbox for the manifold-recovery techniques I want to use in my own
-research.
+I wanted a project that would let me actually use the operator-
+theoretic methods we covered in lecture (covariance, transition
+matrices, propagators, time-frequency representations) on a real
+high-dimensional dataset where the right answer is partly known
+from physics. ENSO is exactly that: a long-studied low-dimensional
+dynamical system embedded in a very high-dimensional state space,
+the SST anomaly field. So the project is partly a sandbox for the
+spectral-decomposition techniques I want to be fluent in.
 
 ### "Did you have a result you were hoping for?"
 
@@ -787,19 +785,6 @@ anomaly and western Pacific thermocline depth. That's two
 dimensions. Adding the seasonal cycle and ENSO Modoki gives roughly
 five intrinsic dimensions, which matches the spectral gap I see in
 the DMAP eigenvalues.
-
-### "How does this relate to neural manifolds?"
-
-The mathematical setup is identical. You have high-dimensional
-observations, the SST field or population firing rates, generated
-by a smooth function of low-dimensional latent variables, the
-climate state or task variables. You want to recover the
-low-dimensional manifold and its geometry from the observations
-alone. The same toolkit, factor analysis or PCA on the linear side,
-diffusion maps or Isomap on the nonlinear side, gets used in both
-fields. Coifman and Lafon's α-family kernel is in active use in
-computational neuroscience for hippocampal place-cell manifolds and
-motor-cortex preparatory subspace.
 
 ### "Could you forecast Niño 3.4 with these methods?"
 

@@ -212,8 +212,8 @@ to confirm*. Takens 1981: a smooth flow on a d-dimensional attractor
 can be reconstructed from a single generic scalar observable, just
 by stacking time-delayed copies. So replacing each monthly snapshot
 with its delay-vector *should* give DMAP more dynamical context and
-improve the recovery. It's also the standard rationale for delay
-embeddings in computational neuroscience, so I had a personal stake.
+improve the recovery. This is the standard rationale for phase-space
+reconstruction throughout chaos theory and time-series analysis.
 
 ▸ Scroll to the delay-sweep figure.
 
@@ -259,15 +259,14 @@ geometry** via DMAP, the **dynamics** via LIM (**Lecture 11**), the
 **temporal** band via the wavelet (**Lectures 15 and 27**). Five of
 seven predictions pass; P6 and P7 fail diagnostically.
 
-The reason this is in the same course as neural-manifolds work:
-PCA, diffusion maps, LIM, the wavelet are not climate-specific.
-Each is a spectral decomposition of an operator: the covariance,
-the transition matrix, the propagator, the time-frequency
-representation. Any structured sampled dynamical system admits all
-four. The same toolkit that recovers an attractor in seventy-five
-years of SST data recovers one in a few hours of neural recordings.
-The substrate doesn't change the math, and that's the part I find
-genuinely exciting.
+The methodological point. PCA, diffusion maps, LIM, the wavelet are
+not four unrelated techniques. Each is a spectral decomposition of
+a different operator: the covariance, the transition matrix, the
+propagator, the time-frequency representation. Any structured
+sampled dynamical system admits all four, and they answer different
+questions about the same data: what shape, what geometry, what
+dynamics, what frequency content. That's why these four belong
+together as a single bundle.
 
 ---
 
@@ -278,8 +277,7 @@ genuinely exciting.
 Coifman and Lafon for diffusion maps. Penland and Sardeshmukh for
 LIM. Torrence and Compo for the wavelet treatment. Jin's recharge
 oscillator. Takens for the embedding theorem. Plus Lorenz's 1956
-EOF analysis and Mante–Sussillo and Pandarinath for the
-neural-manifolds analogy. The full list is on screen.
+EOF analysis. The full list is on screen.
 
 Thank you. I'm happy to take questions.
 

@@ -1324,10 +1324,9 @@ A common pattern in applied dimensionality reduction is to **stack
 methods**, preprocess with one technique, apply another. The stack
 tested here is *Takens' embedding theorem* followed by diffusion maps.
 
-**Takens' theorem (1981)** is a remarkable result from dynamical
-systems theory: a smooth flow on a $d$-dimensional attractor can be
-reconstructed from a *single* generic scalar observable, just by
-stacking time-delayed copies of it. The constructed delay vector
+**Takens' theorem (1981).** A smooth flow on a $d$-dimensional
+attractor can be reconstructed from a *single* generic scalar
+observable, just by stacking time-delayed copies of it. The constructed delay vector
 
 ```math
 y_t \;=\; [x_t,\; x_{t-\tau},\; x_{t-2\tau},\; \dots,\; x_{t-k\tau}]
@@ -1491,28 +1490,31 @@ md"""
 | P7 ρ monotone in k | decreasing | **FAIL** |
 | Permutation null | 46σ / 43σ above null | PASS |
 
-**Headline:** three methods plus a spectrogram, four orthogonal pieces of
-ENSO's signature.
+Five of seven preregistered predictions pass. The two that fail
+(P6 and P7, the time-delay extension of DMAP) fail in a diagnostic
+way: distance concentration at ``k=12`` lags raises the ratio of
+maximum-to-median pairwise distance from 6.9 down to 2.0, the
+Gaussian kernel becomes nearly uniform, and the signal moves off
+the leading nontrivial eigenfunction.
 
-* **PCA / EOF analysis** recovers the canonical *spatial* ENSO mode:
- the warm equatorial tongue and subtropical horseshoe pattern, with
- PC 1 correlating with Niño 3.4 at $\rho = 0.946$.
-* **Anisotropic diffusion maps** recovers the same axis at $\rho = 0.923$
- *and* reveals the *curved geometry* of the climate attractor in
- (Ψ₂, Ψ₃) that PCA's projection cannot see. The methods agree on the
- leading mode and disagree on the shape around it.
-* **The Linear Inverse Model** recovers the *dynamical signature*:
- ENSO as a damped 3-year oscillator with 8-month e-folding decay,
- matching the published-LIM-literature range.
-* **The Morlet wavelet spectrogram** of PC 1 confirms the temporal
- structure: power concentrated in the 3–7 yr ENSO band, with the
- 1997–98 super-El-Niño as the strongest excursion.
+The four positive results, taken together, recover the textbook
+ENSO picture from four mathematically distinct angles:
 
-Together these four checks reproduce the canonical climate-physics
-description of ENSO from four orthogonal directions, all unsupervised.
-The method-stacking robustness check (time-delay diffusion maps) failed,
-diagnosed as distance concentration in high dimensions plus
-eigenfunction reordering, and the failure is reported, not buried.
+* PCA recovers the *spatial* mode, the warm-tongue and subtropical
+  horseshoe pattern, with PC 1 correlating with Niño 3.4 at
+  ``\rho = 0.946``.
+* Anisotropic diffusion maps recovers the same axis at
+  ``\rho = 0.923`` and additionally exposes the *curved geometry*
+  of the attractor in ``(\Psi_2, \Psi_3)`` that PCA's projection
+  cannot see.
+* The Linear Inverse Model recovers the *dynamical signature*: a
+  damped 3-year oscillator with an 8-month e-folding decay, both
+  numbers in the published-LIM range.
+* The Morlet wavelet spectrogram of PC 1 confirms the *temporal*
+  structure: power concentrated in the 3–7 yr ENSO band, strongest
+  excursion at the 1997–98 super-El-Niño.
+
+None of the four used Niño 3.4 as input.
 
 The reason this project sits in the same course as neural-manifolds
 work: PCA, diffusion maps, LIM, and the wavelet are all spectral

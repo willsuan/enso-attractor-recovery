@@ -29,17 +29,20 @@ That is a falsifiable claim about geometry. If the climate state
 genuinely lives on a low-dimensional attractor, three different
 mathematical lenses should all see the same low-dimensional
 structure inside the high-dimensional data. My project tests that.
-Monthly SST anomalies, 1950 to 2024, validation against NOAA's
-official Niño 3.4 index, used only as a yardstick, never as input.
+Monthly sea-surface temperature, SST, anomalies from 1950 to 2024,
+validated against the official Niño 3.4 index from the National
+Oceanic and Atmospheric Administration, NOAA. Niño 3.4 is used
+only as a yardstick, never as input.
 
-The three lenses, listed at the top of the notebook. PCA, the
-in-course method from **Lecture 17 on Covariance**, recovers the
-spatial mode. Anisotropic diffusion maps, the out-of-course method,
-recovers the curved manifold geometry. The Linear Inverse Model from
-Penland and Sardeshmukh, the **Lecture 11 estimation** connection,
-recovers ENSO's dynamical period and damping rate. Plus a Morlet
-wavelet spectrogram from **Lectures 15 and 27** to confirm the
-temporal structure.
+The three lenses, listed at the top of the notebook. Principal
+component analysis, PCA, the in-course method from **Lecture 17 on
+Covariance**, recovers the spatial mode. Anisotropic diffusion
+maps, DMAP, the out-of-course method, recovers the curved manifold
+geometry. The Linear Inverse Model, LIM, from Penland and
+Sardeshmukh, the **Lecture 11 estimation** connection, recovers
+ENSO's dynamical period and damping rate. Plus a Morlet wavelet
+spectrogram from **Lectures 15 and 27** to confirm the temporal
+structure.
 
 All algorithms are written from scratch in Julia. The only primitives
 I take from a library are `LinearAlgebra.svd`, `LinearAlgebra.eigen`,
@@ -51,9 +54,9 @@ and the matrix logarithm.
 
 ▸ Scroll to "## 1, Data: NOAA ERSSTv5 monthly SST".
 
-The data is NOAA's ERSST version five, monthly sea-surface
-temperature, reconstructed from in-situ observations, 1950 to 2024.
-That's 75 years, 900 monthly snapshots.
+The data is NOAA's Extended Reconstructed Sea-Surface Temperature
+version 5, ERSSTv5 for short. Monthly SST, reconstructed from in-situ
+observations, 1950 to 2024. That's 75 years, 900 monthly snapshots.
 
 I restricted to the tropical Pacific, thirty south to thirty north,
 one-twenty east to eighty west, at two-degree resolution. About
@@ -102,12 +105,14 @@ then write predictions that fit, which makes "success" meaningless.
 Locking down predictions and explicit failure thresholds in advance
 turns each pass-or-fail into a real piece of evidence.
 
-Five core predictions. **P1**: EOF-1 should look like the ENSO
-horseshoe. **P2**: PC-1 should correlate with Niño 3.4 above zero
-point nine. **P3**: the diffusion-map coordinate Psi-two should
-correlate above zero point six. **P4**: the DMAP eigenvalue spectrum
-should have a clear gap. **P5**: major historical El Niños should
-appear as far outliers in the phase portrait.
+Five core predictions. **P1**: the leading empirical orthogonal
+function, EOF for short, should look like the ENSO horseshoe.
+**P2**: the leading principal component, PC-1, should correlate
+with Niño 3.4 above zero point nine. **P3**: the leading nontrivial
+diffusion-map coordinate Psi-two should correlate above zero point
+six. **P4**: the DMAP eigenvalue spectrum should have a clear gap.
+**P5**: major historical El Niños should appear as far outliers in
+the phase portrait.
 
 Plus two method-stacking predictions, **P6** and **P7**: a
 Takens-style time-delay embedding should *improve* the DMAP recovery,
@@ -126,11 +131,12 @@ Each month becomes a point in twenty-three hundred dimensional state
 space. PCA asks which low-dimensional linear subspace captures the
 most variance.
 
-The construction, written out in the notebook: take the SVD of the
-centered space-time data matrix. Columns of V are EOFs, spatial
-patterns. Columns of U-times-Sigma are principal components, temporal
-patterns. By Eckart-Young, the rank-k truncation is the optimal
-rank-k approximation of X in any unitarily-invariant norm.
+The construction, written out in the notebook: take the singular
+value decomposition, the SVD, of the centered space-time data matrix.
+Columns of V are EOFs, the spatial patterns. Columns of U-times-Sigma
+are the PCs, the temporal patterns. By Eckart-Young, the rank-k
+truncation is the optimal rank-k approximation of X in any
+unitarily-invariant norm.
 
 ▸ Scroll to the "ρ(PC1, Niño 3.4) = 0.946 → P2 PASS" badge.
 
@@ -387,10 +393,10 @@ a method that uses the time ordering. The Linear Inverse Model from
 Penland and Sardeshmukh, 1995, does exactly that.
 
 The construction. Assume the climate state evolves as a stationary
-stochastic linear ODE, ``dx/dt = L\,x + Q\,\xi(t)``. Estimate the
-one-month propagator ``G(\tau) = C(\tau)\,C(0)^{-1}`` directly from
-data, take the matrix logarithm to get ``L``, then eigendecompose
-``L``. Each complex eigenpair of ``L`` is a damped oscillator with an
+stochastic linear ordinary differential equation, ``dx/dt = L\,x +
+Q\,\xi(t)``. Estimate the one-month propagator
+``G(\tau) = C(\tau)\,C(0)^{-1}`` directly from data, take the matrix
+logarithm to get ``L``, then eigendecompose ``L``. Each complex eigenpair of ``L`` is a damped oscillator with an
 **explicit period** ``T = 2\pi/|\omega|`` and **e-folding decay**
 ``\tau_d = -1/\alpha``. This is a textbook linear-state-space
 estimation problem, the **Lecture 11 connection**: ``L`` is the
@@ -496,11 +502,11 @@ that PC-1 *as a time series* has the right local frequency content,
 not just the right average period. That's what a wavelet spectrogram
 answers.
 
-I ran a Morlet continuous wavelet transform on PC-1, following
-Torrence and Compo, 1998. This is **Lectures 15 and 27 in action**,
-the wavelet basis from Lecture 15 and the time-frequency
+I ran a Morlet continuous wavelet transform, the CWT, on PC-1,
+following Torrence and Compo, 1998. This is **Lectures 15 and 27 in
+action**, the wavelet basis from Lecture 15 and the time-frequency
 representation from Lecture 27. Implementation from scratch via the
-FFT.
+fast Fourier transform, the FFT.
 
 Power is concentrated in the two-to-seven year band, *exactly the
 canonical ENSO range*. The strongest excursion is the 1997-98
@@ -909,9 +915,9 @@ tau is Gaussian with mean exp of L tau times x-of-t and a covariance
 that doesn't depend on x. The negative log likelihood is quadratic
 in L, so maximizing the likelihood reduces to least squares for the
 propagator G of tau equals C of tau times C of zero inverse, then
-L equals log G of tau over tau via the matrix logarithm. That's
-the textbook ML estimation procedure from Lecture 11 applied to a
-linear stochastic ODE.
+L equals log G of tau over tau via the matrix logarithm. That's the
+textbook maximum-likelihood estimation procedure from Lecture 11
+applied to a linear stochastic ODE.
 
 ### "Lecture 21 covered different similarity measures. Why Pearson correlation against Niño 3.4 specifically?"
 

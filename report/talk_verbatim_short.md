@@ -18,7 +18,7 @@ GEO 384H · William Suan · 10 minutes
 
 The tropical Pacific climate state is a twenty-three-hundred-
 dimensional vector. But the climate-physics literature, going back
-to Bjerknes in 1969, has modeled it as a *low-dimensional* dynamical
+to 1969, has modeled it as a *low-dimensional* dynamical
 system, a slow attractor. The dominant mode of that attractor is
 ENSO, El Niño–Southern Oscillation.
 

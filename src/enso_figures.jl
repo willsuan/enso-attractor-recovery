@@ -41,7 +41,7 @@ ix = [findfirst(==(Date(t)), n_t) for t in time_w]
 nino34 = Float64[isnothing(j) ? NaN : n_v[j] for j in ix]
 valid_n = .!isnan.(nino34)
 
-# ----- PCA -----
+# PCA
 println("Fitting PCA...")
 pca = fit_pca(X; rank=20)
 PC = Float64.(pca.scores)
@@ -56,7 +56,7 @@ end
 ρ_PC = [cor(PC[valid_n, k], nino34[valid_n]) for k in 1:5]
 @printf "PC1 vs N3.4: %.3f\n" ρ_PC[1]
 
-# ----- DMAP α-family -----
+# DMAP α-family
 println("Fitting DMAP α-family...")
 dm_alpha = Dict{Float64, Any}()
 ρ_alpha  = Dict{Float64, Vector{Float64}}()
@@ -82,7 +82,7 @@ dm = dm_alpha[1.0].dm
 Ψ  = dm_alpha[1.0].Ψ
 ρ_Ψ = ρ_alpha[1.0]
 
-# ----- Time-delay sweep -----
+# Time-delay sweep
 println("Time-delay sweep (raw spatial)...")
 delay_ks = [0, 3, 6, 9, 12, 18, 24]
 ρ_delay  = Dict{Int, Float64}()       # leading Ψ₂' correlation
@@ -125,7 +125,7 @@ for kd in delay_ks
     @printf "  k=%2d:  ρ(Ψ₂')=%.3f   max ρ(Ψ_k')=%.3f\n" kd cs[1] maximum(cs)
 end
 
-# ----- Negative control -----
+# Negative control
 println("Permutation null distribution (n=500)...")
 rng = MersenneTwister(2026)
 n_clean_idx = findall(valid_n)

@@ -1,110 +1,49 @@
-# GEO 384H Final Project
+# Recovering ENSO-related structure from sea-surface temperature
 
-**Recovering the ENSO Attractor from Sea-Surface Temperature Anomalies**
-*William Suan · 2 May 2026*
+GEO 384H project · William Suan
 
-A linear–nonlinear comparison on the canonical climate-physics dataset.
-Both PCA and anisotropic diffusion maps are implemented from scratch in
-Julia (only `LinearAlgebra.svd` and `LinearAlgebra.eigen` as primitives).
+Can a few coordinates summarize ENSO-related variation in monthly sea-surface temperature (SST)? This project compares principal component analysis (PCA), a linear variance-based baseline, with diffusion maps, a nonlinear similarity-based representation. The Julia implementations use SVD and eigendecomposition.
 
-## Headline result
+## Existing reported results
 
-* PC 1 of tropical-Pacific SST anomalies (1950–2024) correlates with
- the official Niño 3.4 index at **ρ = 0.946**, confirming the
- canonical EOF / ENSO equivalence.
-* The leading nontrivial diffusion-map coordinate Ψ₂ at α = 1
- recovers the same axis at **ρ = 0.923**, without assuming linearity.
- Both correlations are **43–46 σ** above a permutation null.
-* The (Ψ₂, Ψ₃) phase portrait reveals a **curved attractor**: La Niña
- on one end, El Niño on the other, the 1996–99 ENSO cycle traced as
- a coherent loop. PCA's (PC₁, PC₂) plane shows the same data only as
- an unstructured cloud.
-* Method-stacking robustness check: Takens-style time-delay embedding **fails** to
- improve the recovery, diagnosed as distance concentration in the
- lifted space + eigenfunction reordering. Reported as a finding.
+The saved analysis covers 1950–2024 in the tropical Pacific and reports:
 
-## Directory layout
+| Representation | Same-month correlation with Niño 3.4 |
+|:--|:--:|
+| PCA, first principal component | **0.946** |
+| Diffusion maps, first nonconstant coordinate, α = 1 | **0.923** |
 
-```
-.
-├── README.md      ← you are here
-├── Project.toml     ← Julia env (Pkg.instantiate)
-├── Manifest.toml
-│
-├── notebook/ENSO.jl    ← THE main deliverable: Pluto notebook
-├── report/
-│ ├── plan.md         ← project plan with predictions (pre-registered)
-│ ├── report.md       ← written report (markdown source of truth)
-│ ├── report.html     ← styled HTML; print → save as PDF
-│ └── talk_verbatim.md ← 10-min read-aloud script for the notebook walkthrough
-│
-├── src/       ← all algorithm code (from scratch)
-│ ├── load_sst.jl     ← ERSSTv5 loader + Niño 3.4 fetch
-│ ├── pca.jl      ← PCA via SVD + low-rank
-│ ├── diffusion.jl    ← anisotropic α-family DMAP + Nyström
-│ ├── delay_embed.jl    ← Takens-style time-delay stack
-│ ├── lim.jl      ← Linear Inverse Model (Penland & Sardeshmukh)
-│ ├── spectrogram.jl    ← Morlet continuous wavelet transform
-│ ├── metrics.jl     ← trustworthiness, continuity, Procrustes (utility)
-│ ├── enso_analysis.jl   ← end-to-end analysis
-│ ├── enso_figures.jl    ← regenerate all 8 figures
-│ └── render_report.jl   ← markdown → styled HTML
-│
-├── data/
-│ ├── ersst.v5.sst.mnmean.nc  ← NOAA ERSSTv5 monthly SST (~150 MB)
-│ ├── nino34.csv     ← NOAA Niño 3.4 index
-│ └── (Salinas .mat files unused; harmless)
-│
-└── figures/      ← 8 ENSO figures
- ├── fig01_eof1.png       ← EOF 1 horseshoe
- ├── fig02_pc1_nino34.png     ← PC1 vs Niño 3.4 (ρ=0.946)
- ├── fig03_eigenvalues_alpha_scatter.png  ← α-family + eigenvalues
- ├── fig04_phase_portrait.png    ← attractor + 1996–99 loop ★
- ├── fig05_correlations.png     ← method-by-method bars
- ├── fig06_delay_sweep.png     ← method-stacking robustness check
- ├── fig07_null_distribution.png    ← 46σ above null
- ├── fig08_bandwidth.png      ← robustness
- ├── fig09_pc1_spectrogram.png    ← Morlet CWT (Torrence & Compo 1998)
- ├── fig10_lim.png       ← Linear Inverse Model, period 3.1 yr, e-fold 8 mo
- ├── fig11_attractor3d.png     ← 3-D scatter of the climate attractor
- ├── fig12_trajectory_anim.mp4    ← animated phase-portrait trajectory 1990-2010
- ├── fig13_sst_anim.mp4      ← animated SST anomaly map of 1997-98 super-El-Niño
- ├── enso_metrics.txt
- └── lim_summary.txt
-```
+These are recorded results in `figures/enso_metrics.txt`, not results reproduced during this prose revision. PCA has the higher reported correlation. The diffusion-map plots offer another view of warm and cool SST states, but their curvature does not establish a physical attractor or a nonlinear advantage.
 
-★ The phase-portrait figure is the project's punchline.
+**Scope:** this is a full-sample, same-month representation analysis, not forecasting or held-out evaluation. Niño 3.4 is a regional SST anomaly index and shares the input's physical basis. It is not used to fit the embeddings, but is used for sign alignment and interpretation. It is a useful reference, not independent evidence of predictive skill.
 
-## How to reproduce
+The original independent-month permutation test breaks temporal dependence. Its reported 43–46 sigma comparisons should not be interpreted as valid time-series significance. A temporal holdout with training-only preprocessing and a dependence-aware null are proposed next steps, not implemented fixes.
+
+## Meeting guide
+
+Use `report/talk_verbatim_short.md` for a roughly five-minute overview, or `report/talk_verbatim.md` for a longer discussion within a 5–10 minute slot. Focus on the question, computational workflow, PCA baseline, diffusion-map comparison, and limitations. Confirm the speaker's specific contribution before presenting; the scripts do not assign individual implementation ownership.
+
+Show the SST/EOF map, PC1 versus Niño 3.4, and the method comparison. Delay embeddings, wavelets, and the Linear Inverse Model (LIM) are optional backup material.
+
+## Files
+
+- `notebook/ENSO.jl`: interactive Pluto notebook, with revised explanations.
+- `report/report.md`: current report source.
+- `report/report.html`: stale generated report, not regenerated in this revision because Julia was unavailable. Use the revised Markdown instead.
+- `src/`: data loading, PCA, diffusion maps, exploratory extensions, and rendering.
+- `figures/`: existing figures and recorded metrics. Older figure labels and metric commentary may retain the original attractor/significance language; use the revised report's qualifications.
+- `report/plan.md`: historical project plan, not a validation certificate.
+- `submission/` and `submission.zip`: unchanged archived submission.
+
+## Running the project
+
+No analysis was rerun for this text revision. These are the existing entry points:
 
 ```bash
-# 1. Install dependencies
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
-
-# 2. Regenerate every figure (~3 min on Apple Silicon)
-julia --project=. src/enso_figures.jl
-
-# 3. Re-render the report HTML
-julia --project=. src/render_report.jl
-
-# 4. Open the interactive notebook for the live demo
 julia --project=. -e 'using Pluto; Pluto.run(notebook="notebook/ENSO.jl")'
+julia --project=. src/enso_figures.jl
+julia --project=. src/render_report.jl
 ```
 
-The ERSSTv5 data and Niño 3.4 index are auto-downloaded on first run.
-
-## Project summary
-
-* **Data:** NOAA ERSSTv5 monthly SST anomalies, 1950–2024, tropical
- Pacific (30°S–30°N, 120°E–80°W). 900 months × 2,322 sea cells.
-* **Task:** unsupervised recovery of the dominant climate mode
- ("signal/noise separation" in the segmentation sense, separate ENSO
- signal from background variability).
-* **In-course method:** Principal Component Analysis / EOF analysis.
- Lorenz-1956 climate-science canon.
-* **Out-of-course method:** Anisotropic Diffusion Maps (Coifman & Lafon
- 2006) at α = 1 (Laplace–Beltrami). Recovers manifold geometry.
-* **Predictions:** seven, made before running anything (see
- `report/plan.md`). Five pass cleanly, two fail.
-* **Validation:** Niño 3.4 index correlation, permutation null
- (n=500), bandwidth sweep, spatial-shuffle baseline.
+The notebook downloads the ERSSTv5 file if missing. The standalone analysis loader expects `data/ersst.v5.sst.mnmean.nc` to exist. The Niño 3.4 loader can download its reference series. Data alignment, masks, and weighting still need technical verification before stronger claims are made.

@@ -59,9 +59,9 @@ Can a few learned coordinates summarize variation associated with El Niño–Sou
 
 I approached this question by comparing a linear summary of SST variability with a nonlinear representation of similarity between monthly fields. PCA/EOF analysis establishes the variance-based baseline, while anisotropic diffusion maps tests how sampling density and neighborhood scale affect the learned coordinates. I then examined temporal context through delay embeddings in raw-field and PCA feature spaces, alongside parameter sensitivity and control experiments. A Linear Inverse Model (LIM) extends the comparison from snapshot geometry to lagged dynamics. These established methods use SVD, symmetric eigendecomposition, and a matrix logarithm, respectively.
 
-The saved analysis reports same-month Niño 3.4 correlations of **0.946 for PCA** and **0.923 for diffusion maps at α = 1**. Adding 12 monthly lags lowers the leading diffusion-coordinate correlation to **0.470** in raw-field space. These results make the linear baseline and the unsuccessful temporal-feature experiment equally important to the comparison.
+The saved analysis reports same-month Niño 3.4 correlations of **0.946 for PCA** and **0.923 for diffusion maps at α = 1**. Adding 12 monthly lags lowers the leading diffusion-coordinate correlation to **0.470** in raw-field space, contrary to the predicted improvement from including history.
 
-Preprocessing and fitting use the full 1950–2024 record. Niño 3.4 supplies a physically interpretable SST reference for sign alignment, coloring, and descriptive correlations. Its shared SST basis and the temporal dependence of monthly observations define the scope of this evaluation. Numerical values labeled “saved” below come from the repository's metric files; interpolated values come from the notebook's active computation.
+Preprocessing and fitting use the full 1950–2024 record. Niño 3.4 supplies an SST reference for sign alignment, coloring, and same-month correlations within that record. Numerical values labeled “saved” below come from the repository's metric files; interpolated values come from the notebook's active computation.
 """
 
 # ╔═╡ a51c45f4-1f89-45e8-9967-b5b4c3bc6835
@@ -146,7 +146,7 @@ end
 md"""
 ### Sample months: SST anomaly fields
 
-Before comparing compressed representations, I examined three selected anomaly fields to retain a spatial view of the observations before feature weighting. The dashed Niño 3.4 box places the regional reference within the basin-wide input.
+The three selected fields show SST anomalies before feature weighting, using a common color scale. The dashed box marks the Niño 3.4 averaging region within the larger tropical-Pacific domain.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000002
@@ -180,7 +180,7 @@ end
 md"""
 ### Hovmöller diagram: equatorial anomalies through time
 
-Averaging anomalies over 2°S–2°N makes it possible to follow equatorial variation in longitude and time across the monthly fields. The Hovmöller diagram provides that context before dimensionality reduction; the colorbar identifies warm and cool anomalies.
+For the Hovmöller diagram, I averaged anomalies over 2°S–2°N at each longitude and month. This retains the east–west structure that is averaged away in the Niño 3.4 series.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000004
@@ -225,7 +225,7 @@ end
 md"""
 ### Niño 3.4 reference series
 
-The reference series places the selected fields in the longer sequence of positive and negative anomalies, distinguished by the fill. The dashed ±0.5 °C lines provide amplitude guides. Classifying ENSO events also requires averaging, persistence, and other operational conditions beyond an individual month's threshold crossing.
+The reference series uses separate fills for positive and negative anomalies. Dashed lines at ±0.5 °C are amplitude guides; operational event classification also uses averaging and persistence criteria.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000006
@@ -269,7 +269,7 @@ md"""
 3. Does adding temporal context through raw-field or PCA-space delay features improve index recovery?
 4. What do label permutations, spatial shuffling, and lagged-covariance modeling reveal about the representations?
 
-The original project hypotheses included leading-coordinate correlation targets and a predicted improvement of at least 0.05 with 12 lags. I use those targets to organize the descriptive comparisons below. Representation quality beyond index agreement, physical interpretation of higher coordinates, and performance on new months require additional evaluation.
+The original project hypotheses included leading-coordinate correlation targets and a predicted improvement of at least 0.05 with 12 lags. The delay sweep tests that prediction in both raw-field and PCA feature spaces.
 """
 
 # ╔═╡ eaff9fa5-3072-4f2d-848b-6d6705f6b65e
@@ -409,7 +409,7 @@ end
 
 # ╔═╡ f6088bba-972b-4e10-9a3e-df140b6a768d
 md"""
-To see which parts of the basin contribute to PC1, I mapped its loadings back onto the retained geographic cells after dividing by the applied weights. The dashed box locates Niño 3.4 within the broader spatial pattern. The colorbar defines loading signs; geographic interpretation also depends on correcting the weight-order issue described in Section 1.
+To see which parts of the basin contribute to PC1, I mapped its loadings back onto the retained geographic cells after dividing by the applied weights. In the saved EOF1 map, positive loadings form a broad equatorial band through the Niño 3.4 box and extend eastward, with weaker negative loadings in parts of the subtropics. Blue denotes positive loading on this colorbar. The regional index thus samples part of the leading basin-wide pattern, which helps explain its close agreement with PC1.
 """
 
 # ╔═╡ f512c08c-b1f4-4104-824f-f5e0c2506f2f
@@ -444,14 +444,14 @@ end
 
 # ╔═╡ 147cf9a2-7582-48d1-bd4d-194b9d184480
 md"""
-I rescaled PC1 to the reference standard deviation so the overlay compares their timing on a common amplitude scale. The saved correlation of 0.946 indicates closely related same-month variation in these two SST summaries.
+I rescaled PC1 to the reference standard deviation for the overlay. In the saved plot, both series follow the large positive peaks around 1982–83, 1997–98, and 2015–16, but the amplitudes differ within individual events. PC1 rises higher around 1997–98, while Niño 3.4 falls farther below zero around 2000.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000007
 md"""
 ### Higher-order EOFs and the variance budget
 
-The leading mode leaves additional SST variation to explain, so I also examined EOFs 2–4 and the variance budget. These modes describe orthogonal directions beyond the dominant pattern. The saved first-five variance fractions are 0.401, 0.155, 0.082, 0.043, and 0.038. Their maps show what additional coordinates retain, while assigning named physical processes to them requires further evidence.
+EOFs 2–4 resolve spatial variation left after the leading mode. The saved first-five variance fractions are 0.401, 0.155, 0.082, 0.043, and 0.038, so the second mode alone retains appreciable variance beyond PC1. Each map displays another orthogonal loading direction, with its color range scaled separately to show the pattern.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000008
@@ -516,7 +516,7 @@ Some SST configurations occur more often than others, so their frequency can inf
 ```
 Here ``p`` is sampling density. Thus α = 0 retains density drift, α = 1/2 gives the density-weighted backward diffusion operator associated with a Fokker–Planck description, and α = 1 cancels the density-drift term to give a Laplace–Beltrami limit (Coifman & Lafon, 2006).
 
-This gives α = 1 a geometric rationale through reduced sampling-density influence. Comparing it with the other α settings tests how that choice affects the finite-sample representation. The theoretical motivation concerns the graph construction; establishing a physical climate attractor would require separate dynamical evidence.
+I compared α = 1 with α = 0 and 1/2 to see how reducing sampling-density influence changes the finite-sample coordinates and their agreement with Niño 3.4.
 """
 
 # ╔═╡ 369b550f-b097-4470-ae92-e601394f5db0
@@ -526,7 +526,7 @@ This gives α = 1 a geometric rationale through reduced sampling-density influen
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-300000000001
 md"""
-I also varied **diffusion time** ``t`` to examine how spectral weighting changes the geometry. Through ``\lambda_j^t\psi_j``, increasing ``t`` suppresses smaller-eigenvalue modes relative to the leading ones. The slider exposes these relative coordinate scales for ``t=1,\ldots,5``. Scaling an individual nonzero coordinate by a positive constant leaves its Pearson correlation unchanged, so this comparison concerns geometry rather than a new correlation improvement.
+**Diffusion time** ``t`` controls the relative scales of the coordinates through ``\lambda_j^t\psi_j``. Increasing ``t`` suppresses smaller-eigenvalue modes more strongly, changing distances in the truncated embedding while leaving each nonzero coordinate's Pearson correlation unchanged under positive rescaling. The slider varies ``t=1,\ldots,5`` with the same fitted eigenfunctions.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-300000000002
@@ -566,7 +566,7 @@ end
 md"""
 **Ψ₂ versus Niño 3.4:** $(round(ρ_Ψ[1]; digits=3)) at the selected settings.
 
-The saved α = 1, t = 1 correlation is 0.923. This quantifies same-month index agreement within the full-sample embedding.
+At α = 1, t = 1, the saved correlation is 0.923, below PC1's 0.946.
 """
 
 # ╔═╡ 506a5a59-29a5-447c-b0f9-1afe70b75251
@@ -592,7 +592,7 @@ end
 
 # ╔═╡ 36b45df3-bb5c-4739-a21c-7f06d07ff491
 md"""
-The eigenvalue spectrum helps assess which graph modes remain prominent under repeated applications of P and where truncation might be useful. The plotted spectrum includes the constant mode at λ₁ = 1; the automatic largest-gap marker can therefore select the gap between that mode and the first informative coordinate. Gaps among nonconstant modes can guide truncation, with sensitivity to bandwidth, normalization, and sampling. Assigning a physical dimension or naming individual climate modes requires evidence beyond this spectrum.
+In the saved α-family spectrum, the largest drop is from the constant mode at λ₁ = 1 to the first nonconstant mode. The α = 1 curve retains larger leading nonconstant eigenvalues than α = 0, with α = 1/2 between them. Subsequent eigenvalues taper into a smaller tail, so repeated applications of P increasingly emphasize the first few coordinates. Because the automatic gap marker includes the constant mode, its largest gap separates that trivial mode from the embedding rather than choosing how many informative coordinates to retain.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000009
@@ -604,11 +604,9 @@ To connect the spectral coordinates with the similarities that generate them, I 
 K_\varepsilon(i, j) = \exp(-\|x_i - x_j\|^2 / \varepsilon),
 ```
 a $T \times T$ array comparing each month $i$ with each month $j$.
-Ordering both axes chronologically makes similarities between distant
-parts of the record visible. Bright off-diagonal patches mark months
-in different decades that share a similar SST anomaly configuration.
-After α renormalization and row normalization, the leading nonconstant
-eigenvectors supply the coordinates Ψ₂, Ψ₃, ... with diffusion-time scaling.
+Both axes follow chronological order. An off-diagonal entry compares
+two distinct months, with larger values indicating more similar weighted
+SST fields. The diagonal is one because each field has zero distance from itself.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000a
@@ -689,30 +687,30 @@ end
 
 # ╔═╡ ba48d31e-046a-48d5-a9e4-ac4117dd4855
 md"""
-The left panel places months in two diffusion coordinates and colors them by Niño 3.4. The right panel follows the selected 1996–1999 interval through those coordinates.
+In the saved phase portrait, negative Niño 3.4 months occupy the left side of an arched cloud, while positive months extend along the descending right branch. December 1997 lies farther down that branch than the marked Decembers of 1982 and 2015. The colorbar runs from negative anomalies in red to positive anomalies in blue.
 
-These views locate warm and cool SST states and trace their observed sequence. Their shape also depends on the coordinate functions. Nonlinear eigenfunctions can bend an embedding, and linear PCA projections can also display curved data. Interpreting Ψ₃ as a physical asymmetry coordinate or the trajectory as a specific oscillator therefore requires a separate test.
+Connecting the 1996–1999 months traces an excursion across this cloud. The second coordinate bends as the first increases, so distance along the horizontal axis alone misses part of the separation between states. That curvature describes the fitted coordinates; testing an oscillator interpretation would require estimating their temporal evolution across multiple events.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000d
 md"""
 ### Occupancy in the fitted coordinates
 
-To examine uneven sampling across states directly, I counted months in a two-dimensional histogram of the fitted coordinates and smoothed it with a local box filter. The resulting empirical occupancy view shows where observations concentrate within the graph geometry.
+I counted months in a 36 × 36 histogram of the α = 1 coordinates and averaged interior bins over a 3 × 3 neighborhood before drawing occupancy contours. Each monthly observation contributes one count.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa0000000f
 md"""
 ### Calendar timing along a selected trajectory
 
-Coloring the same 1996–1999 trajectory by month of year asks how its progression relates to seasonal timing. This selected interval provides context for a broader seasonal phase-locking analysis.
+The same 1996–1999 trajectory is colored by calendar month, with each December labeled to compare its position across the four years.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000001
 md"""
 ### Three-coordinate and spatial views
 
-I extended the view to three coordinates to expose variation hidden by the two-dimensional projection. Pairing positions in the embedding with SST maps and the reference series keeps the learned coordinates connected to the original observations in the stored figures and animations.
+Adding Ψ₄ separates states that overlap in the two-coordinate projection. The stored figures then pair a selected January 1998 state with its Niño 3.4 value and SST anomaly map.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000002
@@ -720,7 +718,7 @@ PlutoUI.LocalResource(joinpath(@__DIR__, "..", "figures", "fig11_attractor3d.png
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000003
 md"""
-*Figure 11.* Monthly fields in three diffusion coordinates, with selected historical events marked. This is a higher-dimensional view of the fitted representation.
+*Figure 11.* The monthly cloud has visible thickness in Ψ₄, and several marked events lie on its sparsely sampled outer portions. The third coordinate preserves variation hidden when the cloud is projected onto Ψ₂ and Ψ₃.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000004
@@ -728,7 +726,7 @@ PlutoUI.LocalResource(joinpath(@__DIR__, "..", "figures", "fig12_trajectory_post
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000005
 md"""
-*Figure 12.* The January 1998 state in the embedding, paired with the reference time series. The stored animation follows the historical sequence through these coordinates.
+*Figure 12.* January 1998 lies on the lower-right branch of the embedding, near the positive peak of the accompanying Niño 3.4 series. The stored animation follows the monthly sequence through these coordinates.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000006
@@ -736,7 +734,7 @@ PlutoUI.LocalResource(joinpath(@__DIR__, "..", "figures", "fig13_sst_poster.png"
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-500000000007
 md"""
-*Existing figure 13.* The SST anomaly field for the selected January 1998 month. The dashed box marks the Niño 3.4 region. The map is the spatial view of the state highlighted above.
+*Figure 13.* In January 1998, positive SST anomalies extend through the Niño 3.4 box into the eastern equatorial Pacific, while negative anomalies occupy parts of the southern subtropics. Blue is positive on this map. The equatorial warming extends beyond the regional averaging box.
 """
 
 # ╔═╡ a33add4b-3acc-48c1-bc0d-97c814e3b39f
@@ -902,7 +900,7 @@ end
 
 # ╔═╡ 67db4c45-9a70-4304-b9d9-c05ec77537ff
 md"""
-The saved correlations in `figures/enso_metrics.txt` are 0.946 for PCA and 0.943, 0.937, and 0.923 for diffusion maps at α = 0, 0.5, and 1. The leading-coordinate metric favors PCA across these settings. The α = 1 rationale targets density correction rather than maximizing this correlation.
+The saved comparison shows a broad PCA cloud with a Niño 3.4 gradient along PC1. The diffusion-map clouds bend, with the positive-index states extending into a curved branch at α = 1. This change in shape comes with slightly lower leading-coordinate agreement. Saved correlations in `figures/enso_metrics.txt` are 0.946 for PCA and 0.943, 0.937, and 0.923 for diffusion maps at α = 0, 0.5, and 1.
 
 The table below is computed with the default median bandwidth and diffusion time 1; the α and time controls above affect the separately selected embedding.
 
@@ -913,15 +911,17 @@ The table below is computed with the default median bandwidth and diffusion time
 | DMAP α=0.5 | $(round(dm_alpha[0.5].ρ[1]; digits=3)) |
 | DMAP α=1 | $(round(dm_alpha[1.0].ρ[1]; digits=3)) |
 
-The leading coordinate alone may miss index-related variation elsewhere in the representation, so I also compared the first five coordinates. The saved α = 1 absolute correlations for Ψ₂–Ψ₆ are 0.923, 0.297, 0.196, 0.142, and 0.072. The same leading-five comparison is computed for PCA and each α setting, with the saved mode-by-mode view in `figures/fig05_correlations.png`.
+The leading coordinate alone may miss index-related variation elsewhere in the representation, so I also compared the first five coordinates. The saved α = 1 absolute correlations for Ψ₂–Ψ₆ are 0.923, 0.297, 0.196, 0.142, and 0.072. In the saved mode-by-mode plot (`figures/fig05_correlations.png`), every method drops sharply after its first coordinate; none of the next four approaches the leading-coordinate agreement.
 
 ### Bandwidth sensitivity
 
-The kernel's locality scale can change which monthly fields are strongly connected. To probe that dependence, the bandwidth sweep fits α = 1 maps at 11 logarithmically spaced multipliers ``10^s``, with ``s`` from −1 to 1.5, relative to the median-distance bandwidth. It compares absolute leading-coordinate correlation with the PCA baseline; the saved curve is in `figures/fig08_bandwidth.png`. The original report describes reduced correlation at small bandwidths and a broad high-bandwidth plateau. Because the numerical values are stored graphically rather than in the saved metric table, the exact plateau and connectivity claims remain unverified. These full-sample comparisons characterize sensitivity rather than held-out parameter selection.
+The kernel's locality scale can change which monthly fields are strongly connected. To probe that dependence, the bandwidth sweep fits α = 1 maps at 11 logarithmically spaced multipliers ``10^s``, with ``s`` from −1 to 1.5, relative to the median-distance bandwidth. This sweep measures index correlation; attributing a change to weak graph connectivity would also require affinity or spectral diagnostics.
+
+In the saved curve (`figures/fig08_bandwidth.png`), absolute leading-coordinate correlation rises from about 0.38 at one-tenth of the median bandwidth to about 0.92 at the median. At larger bandwidths it levels off near the PCA baseline of 0.946. The poor small-bandwidth result gives way to a broad plateau, rather than a narrow best setting.
 
 ### Assessing more than index agreement
 
-Index correlation leaves open how well an embedding preserves neighborhoods and how its coordinates compare with another representation. Trustworthiness penalizes neighbors introduced by an embedding, while continuity penalizes original neighbors lost in it. Orthogonal Procrustes alignment fits a rotation/reflection between coordinate matrices and reports relative residual error. These geometric comparisons are implemented alongside PCA low-rank reconstruction (`denoise_pca`) and graph smoothing by repeated multiplication with the fitted transition matrix (`diffusion_smooth`). They provide ways to examine reconstruction, smoothing, and representation quality beyond the reference index, although their evaluated results remain outside the present analysis.
+Index correlation leaves open how well an embedding preserves neighborhoods and how its coordinates compare with another representation. Trustworthiness penalizes neighbors introduced by an embedding, while continuity penalizes original neighbors lost in it. Orthogonal Procrustes alignment fits a rotation/reflection between coordinate matrices and reports relative residual error. These geometric comparisons are implemented alongside PCA low-rank reconstruction (`denoise_pca`) and graph smoothing by repeated multiplication with the fitted transition matrix (`diffusion_smooth`). Their implementations are available, but this analysis reports no evaluated scores for those comparisons.
 
 ### Extending the representation to new observations
 
@@ -943,9 +943,9 @@ PCA and snapshot diffusion maps organize fields by variance or similarity, leavi
 ```
 With a consistent column-state convention, ``C(\tau)=E[z_{t+\tau}z_t^\top]`` gives ``G(\tau)=C(\tau)C(0)^{-1}`` and ``L=\log G/\tau``. A complex eigenvalue ``\sigma=a+i\omega`` describes a mode with period ``2\pi/|\omega|`` and, for ``a<0``, decay time ``-1/a``.
 
-Interpreting the fitted coordinates requires care with the covariance convention. The current calculation uses ``C_0=X_c^\top X_c/(T-1)``, ``C_1=X_a^\top X_b/(T-\tau-1)``, and ``G=C_1C_0^{-1}``, where rows of ``X_a`` precede rows of ``X_b``. This lag-covariance orientation differs from the column-state convention above. The propagator orientation and eigenmode projection need a consistent convention check before physical interpretation of the fitted mode coordinates.
+The implementation's covariance convention is unresolved. It computes ``C_0=X_c^\top X_c/(T-1)``, ``C_1=X_a^\top X_b/(T-\tau-1)``, and ``G=C_1C_0^{-1}``, where rows of ``X_a`` precede rows of ``X_b``. This reverses the lag-covariance orientation relative to the column-state convention above. The propagator and eigenmode projection must use a consistent convention before these coordinates can support a physical interpretation. The reported real-mode correlation also depends on the arbitrary phase of the complex eigenvector, for which sign alignment alone fixes only a sign.
 
-To focus the comparison on interannual variation, the mode-selection rule restricts periods to 2–8 years and chooses the positive-frequency complex mode with the smallest absolute real part. That period window is imposed by selection. LIM therefore supplies a model-dependent temporal summary that complements the snapshot embeddings; a prospective forecast comparison would require held-out trajectories.
+Within the fitted spectrum, the selection rule searches the imposed 2–8 year period window and chooses the positive-frequency complex mode with the smallest absolute real part. The period reported below is the selected mode's fitted value within that window.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-400000000003
@@ -984,7 +984,7 @@ end
 md"""
 The active selected mode has period $(round(lim_periods[lim_idx]; digits=2)) years and decay time $(round(lim_decays[lim_idx]; digits=2)) years.
 
-The saved LIM summary records a period of 3.12 years, a decay time of 0.68 years, and correlation 0.613 between the real mode projection and Niño 3.4 (`figures/lim_summary.txt`). Period and decay summarize the fitted lag-covariance operator. The real part of a complex coordinate depends on the mode's phase convention, so its index correlation also depends on how that projection is defined. These distinctions, together with the covariance-orientation issue, limit the physical interpretation of the comparison with PCA.
+The saved LIM summary records a period of 3.12 years, a decay time of 0.68 years, and correlation 0.613 between the real mode projection and Niño 3.4 (`figures/lim_summary.txt`). The highlighted eigenpair lies in the negative-real half-plane, and its decay time is shorter than its period. In this fitted linear model, an unforced contribution from that mode would therefore decay substantially before completing a cycle. Its real projection has lower index agreement than PC1, despite the explicit use of lagged covariance.
 """
 
 # ╔═╡ 88921a71-c8a1-46dd-8d51-fb38d78d6b24
@@ -1034,9 +1034,9 @@ end
 
 # ╔═╡ c38ddd37-0dfc-43fa-bf05-b6e5cea6b9e2
 md"""
-The saved shuffle means are 0.0261 (PCA) and 0.0265 (diffusion maps), with 95th percentiles 0.0615 and 0.0659. The aligned correlations exceed these shuffled values. The archived 46σ and 43σ separations describe this particular independent-month distribution; temporal persistence prevents treating them as calibrated time-series significance levels.
+The saved shuffle means are 0.0261 (PCA) and 0.0265 (diffusion maps), with 95th percentiles 0.0615 and 0.0659. Both saved maxima are 0.1030, well below the aligned correlations of 0.946 and 0.923. The archived 46σ and 43σ separations refer to this independent-month distribution, whose loss of temporal persistence is described above.
 
-The spatial-shuffle control asks a different question, whether representation–index agreement survives when consistent spatial organization is removed. It independently permutes feature order within each monthly row, then refits PCA and diffusion maps. Each row retains its distribution of weighted feature values while losing consistent geographic correspondence with other months. The original report describes residual correlation around 0.65, but the current saved metric file omits separate spatial-shuffle estimates, so that approximate report-level value has incomplete numerical provenance. A difference between correlations cannot partition the physical signal into spatial and amplitude contributions.
+The spatial-shuffle control independently permutes feature order within each monthly row and refits PCA and diffusion maps. This preserves each month's distribution of weighted feature values while removing consistent geographic correspondence between months. The original report describes residual correlation around 0.65; separate spatial-shuffle estimates are absent from the saved metric file. That approximate value remains a report-level result. Because shuffling changes the fitted representation as well as the input geometry, subtracting its correlation from the original score would not isolate a physical spatial contribution.
 """
 
 # ╔═╡ 7a9ae0e7-0382-4f81-aab0-b8b42bbab1e8
@@ -1049,7 +1049,7 @@ y_t=[x_t,x_{t-\tau},\ldots,x_{t-k\tau}].
 ```
 Stacking these histories produces ``T-k\tau`` rows and ``(k+1)N`` columns while retaining the original index of each row's current month. I used monthly spacing ``\tau=1`` and ``k\in\{0,3,6,9,12,18,24\}``, then fitted diffusion maps at α = 1 and diffusion time 1. The median-distance bandwidth is recomputed in each feature space, and Niño 3.4 is aligned to the current month at the end of each history window.
 
-Takens-style reconstruction provides a theoretical reason to consider delayed observations. Under smooth deterministic dynamics and generic-observation assumptions, sufficiently many delays can encode an underlying state. The multivariate, noisy SST histories used here serve as an empirical feature construction, so the comparison asks whether they improve the chosen representation metric rather than assuming that the reconstruction conditions hold.
+Takens-style reconstruction motivates including history. Under smooth deterministic dynamics and generic-observation assumptions, sufficiently many delays can encode an underlying state. Here the observations are multivariate, noisy SST fields, and the experiment tests their delayed features against the same-month reference without assuming those reconstruction conditions hold.
 
 I compared delays of the full weighted SST field with delays of the top 10 PCA scores to examine whether reducing each monthly block before adding history changes the result. The computation below performs the raw-field sweep; saved metrics include both pipelines. Each compares the leading coordinate with the maximum absolute correlation among the first **five** nonconstant coordinates (Ψ₂–Ψ₆), checking whether index agreement shifts elsewhere in the spectrum.
 """
@@ -1113,9 +1113,11 @@ The active raw-field sweep gives a change of $(delay_diff_str) at 12 lags relati
 | 18 | 0.253 | 0.692 | 0.242 | 0.700 |
 | 24 | 0.136 | 0.605 | 0.129 | 0.601 |
 
-Both pipelines fell short of the predicted improvement of at least 0.05 at 12 lags. The saved changes are −0.453 (raw) and −0.450 (PC space), and leading-coordinate agreement decreases throughout the tested sweep. At longer delays, a different leading-five coordinate has higher correlation, showing that a single leading-coordinate score misses some retained index agreement. Even that selected maximum remains below the corresponding no-delay result.
+Both pipelines fell short of the predicted improvement of at least 0.05 at 12 lags. The saved changes are −0.453 (raw) and −0.450 (PC space), and leading-coordinate agreement decreases throughout the tested sweep. Compressing each monthly block to 10 PCs leaves this decline largely intact.
 
-Interpreting this decrease requires separating several changes introduced by delay stacking. The distance metric, bandwidth, number of observations, and dates being compared all change together. The best-of-five value also uses the reference to select a coordinate, making it an exploratory upper comparison rather than an independently evaluated score. Distance concentration and eigenfunction reordering are possible mechanisms; the saved correlations alone do not identify their causes. The original report additionally describes sparse spacings τ = 3 and 6 as unsuccessful, but the inspected sweep code and metric file retain only τ = 1, leaving the sparse-spacing claim without reproducible settings or saved values. The supported negative result concerns these specific feature constructions and same-month metric.
+At 12 lags, the best-of-five correlation exceeds the leading-coordinate value in both pipelines. By 18 lags, these selected maxima remain near 0.7 while the leading values have fallen to about 0.25. Index-related variation has shifted toward other coordinates, but even the selected maxima stay below the no-delay baselines.
+
+Delay stacking changes the distance metric, bandwidth, sample size, and dates being compared together. A matched-date comparison would separate the shortened record from the change in features. The best-of-five score also selects a coordinate using the reference itself. Distance concentration and eigenfunction reordering are possible explanations to investigate, rather than causes established by these correlations. The original report additionally describes sparse spacings τ = 3 and 6 as unsuccessful; only τ = 1 has retained sweep code and saved values, so the saved negative result reported here is for monthly spacing.
 """
 end
 
@@ -1123,7 +1125,7 @@ end
 md"""
 ## 7.5, Temporal context: wavelet view of PC1
 
-To examine how PC1's dominant timescales changed over the record, I computed a Morlet continuous wavelet transform using FFT convolution. Dividing wavelet power by PC1 variance and marking a 3–7 year reference band relates the learned spatial pattern to the timescales present in its score series. The cone of influence limits interpretation near the record's boundaries.
+To examine how PC1's dominant timescales changed over the record, I computed a Morlet continuous wavelet transform using FFT convolution. Power is divided by PC1 variance, with dashed lines marking a 3–7 year reference band. The shaded cone-of-influence region marks boundary-affected scales, where the finite record limits interpretation, especially at long periods near its ends.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-200000000003
@@ -1153,20 +1155,22 @@ end
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-200000000004
 md"""
-Where LIM summarizes temporal variation through a fitted period and decay, the wavelet view locates periods and epochs contributing power to PC1. The shaded cone-of-influence region identifies scales affected by the finite record's boundaries. Together, the views compare a model-based temporal summary with a descriptive time-frequency analysis.
+The saved wavelet plot shows strong power around 3–5 years in the early-to-mid 1970s, around 4–6 years in the late 1980s, and around 2.5–4 years near the late 1990s. These patches occupy different periods and epochs rather than forming a uniform ridge across the record. LIM's selected 3.12-year period summarizes one fitted mode, whereas PC1 contains interannual power whose distribution changes with time.
 """
 
 # ╔═╡ 5239ef9c-6555-433a-a749-79cf136aff0e
 md"""
 ## 8, Summary
 
-- Comparing PCA and diffusion maps on calendar-month SST anomalies established a strong linear baseline. PCA's saved leading variance fraction is 0.401, with Niño 3.4 correlation 0.946; diffusion maps at α = 1 gives 0.923. PCA is stronger on this same-month metric.
-- Varying density normalization gives saved correlations 0.943, 0.937, and 0.923 across the α-family. Bandwidth and diffusion-time comparisons examine how graph construction and spectral weighting shape the representation beyond that score.
-- Adding history reduced leading-coordinate agreement in both the raw-field and top-10-PC delay pipelines. At 12 lags the saved correlations are 0.470 and 0.459. Looking across the first five nonconstant modes recovers some agreement, while remaining below each no-delay baseline.
-- Bringing time into the analysis through LIM and wavelets connects lagged-covariance modeling with PC1's time-frequency content. Label permutations and spatial shuffling probe the roles of alignment and spatial organization, with different methodological limits.
-- Projecting later months would extend the comparison beyond the fitted record. PCA projection and Nyström diffusion-coordinate extension are implemented, while their use in a temporal holdout remains an evaluation task.
+PCA retains 0.401 of the SST variance in its first mode, whose positive equatorial loadings overlap the Niño 3.4 region. Its saved index correlation of 0.946 exceeds the default diffusion-map results of 0.943, 0.937, and 0.923 across the α-family. Diffusion maps changes the shape of the monthly cloud, and increasing bandwidth brings leading-coordinate agreement close to PCA's level on the saved sensitivity curve.
 
-The comparison supports low-dimensional summaries of ENSO-related SST variation in the fitted record, with PCA providing the strongest leading-coordinate agreement among the saved settings. The geometry plots raise further questions about higher coordinates, while nonlinear superiority and physical attractor identification remain open. Correcting area-weight ordering and verifying LIM conventions are necessary before re-evaluating those interpretations. A temporal holdout would fit climatology, masks, centering, representations, and parameter choices on training data, then project later months; a dependence-aware control would address serial correlation. Both remain future evaluation designs.
+Adding monthly history lowers leading-coordinate agreement in both raw-field and top-10-PC feature spaces. At 12 lags the saved correlations are 0.470 and 0.459; selecting the best of five coordinates recovers some agreement, but remains below each no-delay baseline. The predicted gain from delays failed in both constructions.
+
+The temporal analyses describe different aspects of the record. LIM selects a 3.12-year mode with a much shorter 0.68-year decay time, while the wavelet plot shows PC1's interannual power concentrated in different periods at different epochs. Independent-month label permutations reduce index agreement sharply. The spatial-shuffle result remains approximate because its separate numerical outputs were not saved.
+
+Two implementation issues take priority before rerunning these comparisons. The latitude weights need to follow the same feature-column order as the SST matrix, and LIM's lag-covariance orientation and projection need a consistent state convention. Physical attractor identification also remains unresolved, since the fitted coordinate clouds alone establish neither a governing oscillator nor an attractor dimension.
+
+Evaluation on later months remains unfinished. A dependence-preserving null would retain the serial structure erased by the current label shuffle. For a temporal holdout, climatology, masks, centering, representations, and parameter choices would all be fitted on the training interval. The implemented PCA projection and Nyström extension would then place later monthly fields in those fixed coordinates.
 """
 
 # ╔═╡ 30d4a0b5-bbbb-cccc-dddd-aaaa00000020
